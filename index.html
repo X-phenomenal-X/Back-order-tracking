@@ -233,26 +233,74 @@ tr.row-done td:first-child { border-left: 3px solid var(–green); }
 
 /* MOBILE */
 @media (max-width: 768px) {
-.header { padding: 10px 14px; }
-.brand-name { font-size: 0.95rem; }
+body { padding-bottom: 90px; }
+.header { padding: 10px 12px; flex-wrap: nowrap; gap: 8px; }
+.header-left { flex: 1; min-width: 0; gap: 10px; }
+.header-logo img { width: 38px !important; height: 38px !important; }
+.brand-name { font-size: 0.9rem; }
+.brand-title { font-size: 0.62rem; letter-spacing: 1px; }
 .header-sub { display: none; }
 .clock-mini { display: none; }
-.content { padding: 14px; }
-.daily-summary { padding: 14px; flex-direction: column; align-items: stretch; gap: 14px; }
-.summary-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.summary-stat { padding: 0 4px; border: none; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 4px; }
-.summary-num { font-size: 1.2rem; }
-.insights-row { grid-template-columns: 1fr; }
+.header-right { gap: 6px; flex-shrink: 0; }
+.user-picker { padding: 4px 8px; }
+.user-picker label { display: none; }
+.user-picker select { font-size: 0.75rem; max-width: 80px; }
+.notif-bell { padding: 4px 8px; font-size: 0.9rem; }
+
+.tabs { padding: 0 12px; }
+.tab { padding: 10px 14px; font-size: 0.7rem; letter-spacing: 1px; }
+.tab[onclick*=“Weekly”], .tab[onclick*=“Sync”] { margin-left: 0 !important; padding: 10px 10px; font-size: 0.65rem; }
+
+.content { padding: 12px; }
+
+.daily-summary { padding: 14px 16px; flex-direction: column !important; align-items: stretch !important; gap: 14px; display: flex !important; }
+.summary-greeting h2 { font-size: 1.05rem; }
+.summary-greeting p { font-size: 0.78rem; }
+.summary-stats { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.summary-stat { padding: 8px 4px !important; border: none !important; background: rgba(255,255,255,0.08); border-radius: 6px; }
+.summary-num { font-size: 1.15rem; }
+.summary-label { font-size: 0.55rem; letter-spacing: 0.8px; }
+
+.quick-filters { gap: 6px; }
+.qf-pill { padding: 6px 10px; font-size: 0.68rem; }
+
+.kpi-row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+.kpi-card { padding: 12px 14px; }
+.kpi-val { font-size: 1.7rem; }
+.kpi-label { font-size: 0.55rem; }
+.kpi-sub { font-size: 0.65rem; }
+
+.insights-row { display: grid !important; grid-template-columns: 1fr !important; gap: 12px; }
+.insight-card { padding: 14px; }
+.insight-title { font-size: 0.75rem; }
+.chart-container { height: 140px; }
+
 .toolbar { gap: 6px; }
-.search-box { min-width: 100%; }
-.btn { padding: 8px 12px; font-size: 0.65rem; }
+.search-box { min-width: 100%; flex-basis: 100%; }
+.filter-sel, .toolbar .btn { flex: 1; min-width: 0; }
+.btn { padding: 7px 10px; font-size: 0.62rem; letter-spacing: 0.8px; }
+
 table { min-width: 700px; }
 th, td { padding: 8px 10px; font-size: 0.74rem; }
-.modal { padding: 18px; max-height: 95vh; }
-.form-grid { grid-template-columns: 1fr; }
-.fab { width: 50px; height: 50px; bottom: 14px; right: 14px; font-size: 1.5rem; }
-.notif-dropdown { right: 8px; left: 8px; width: auto; }
-#notification-area { right: 8px; left: 8px; max-width: none; top: 70px; }
+
+.modal { padding: 18px; max-height: 95vh; border-radius: 10px; }
+.modal-title { font-size: 0.95rem; }
+.form-grid { grid-template-columns: 1fr !important; }
+.modal-actions { flex-wrap: wrap; }
+.modal-actions .btn { flex: 1; min-width: 100px; }
+.modal-actions .btn[onclick*=“emailOrder”] { margin-right: 0 !important; flex-basis: 100%; }
+
+.fab { width: 56px; height: 56px; bottom: 16px; right: 16px; font-size: 1.8rem; }
+.notif-dropdown { right: 8px; left: 8px; width: auto; top: 60px; max-height: 70vh; }
+#notification-area { right: 8px; left: 8px; max-width: none; top: 60px; }
+.autosave-indicator { bottom: 80px; left: 16px; }
+
+.report-content { padding: 20px; max-height: 95vh; }
+}
+
+@media (max-width: 420px) {
+.summary-stats { grid-template-columns: repeat(2, 1fr) !important; }
+.kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 @media print {
