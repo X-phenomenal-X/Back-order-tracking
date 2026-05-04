@@ -1,230 +1,228 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Tracker — BVGlazing Systems</title>
+<title>Order Tracker — BVGlazing Systems (Cloud Synced)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap');
 
 :root {
-–bg: #f5f2ec; –surface: #ffffff; –surface2: #f0ede6; –border: #ddd9d0;
-–ink: #1a1814; –muted: #8a8478; –accent: #c8410a; –accent2: #2b6cb0;
-–green: #276749; –yellow: #b7791f;
-–urgent: #c8410a; –normal: #b7791f; –onhold: #c8720a;
-–row-overdue: rgba(200,65,10,0.12);
-–row-urgent: rgba(200,65,10,0.06);
-–row-onhold: rgba(200,114,10,0.06);
-–row-done: rgba(39,103,73,0.05);
+  --bg: #f5f2ec; --surface: #ffffff; --surface2: #f0ede6; --border: #ddd9d0;
+  --ink: #1a1814; --muted: #8a8478; --accent: #c8410a; --accent2: #2b6cb0;
+  --green: #276749; --yellow: #b7791f;
+  --urgent: #c8410a; --normal: #b7791f; --onhold: #c8720a;
+  --row-overdue: rgba(200,65,10,0.12);
+  --row-urgent: rgba(200,65,10,0.06);
+  --row-onhold: rgba(200,114,10,0.06);
+  --row-done: rgba(39,103,73,0.05);
 }
-
-- { margin:0; padding:0; box-sizing:border-box; }
-  body { background: var(–bg); color: var(–ink); font-family: ‘Lato’, sans-serif; min-height: 100vh; padding-bottom: 80px; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background: var(--bg); color: var(--ink); font-family: 'Lato', sans-serif; min-height: 100vh; padding-bottom: 80px; }
 
 /* HEADER */
-.header { background: var(–surface); border-bottom: 2px solid var(–border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 6px rgba(0,0,0,0.06); flex-wrap: wrap; gap: 12px; }
+.header { background: var(--surface); border-bottom: 2px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 6px rgba(0,0,0,0.06); flex-wrap: wrap; gap: 12px; }
 .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .header-logo img { display:block; border-radius:8px; }
-.brand-name { font-family: ‘Syne’, sans-serif; font-size: 1.05rem; font-weight: 800; color: #1a2e4a; line-height: 1.2; }
-.brand-title { font-family: ‘Syne’, sans-serif; font-size: 0.7rem; font-weight: 700; color: var(–accent); letter-spacing: 1.5px; text-transform: uppercase; }
-.header-sub { font-size: 0.65rem; color: var(–muted); margin-top: 2px; font-family: ‘IBM Plex Mono’, monospace; }
+.brand-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; color: #1a2e4a; line-height: 1.2; }
+.brand-title { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; }
+.header-sub { font-size: 0.65rem; color: var(--muted); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
 
 .header-right { display: flex; align-items: center; gap: 14px; }
-.user-picker { display: flex; align-items: center; gap: 6px; background: var(–surface2); padding: 6px 10px; border-radius: 20px; border: 1px solid var(–border); }
-.user-picker label { font-size: 0.65rem; color: var(–muted); font-family: ‘IBM Plex Mono’, monospace; text-transform: uppercase; letter-spacing: 1px; }
-.user-picker select { background: transparent; border: none; outline: none; font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.82rem; color: var(–ink); cursor: pointer; padding-right: 4px; }
-.notif-bell { position: relative; cursor: pointer; padding: 6px 10px; border-radius: 8px; background: var(–surface2); border: 1px solid var(–border); font-size: 1rem; transition: all 0.2s; }
-.notif-bell:hover { background: var(–bg); }
-.notif-badge { position: absolute; top: -4px; right: -4px; background: var(–urgent); color: #fff; border-radius: 10px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 0.65rem; font-weight: 700; display: none; align-items: center; justify-content: center; }
+.user-picker { display: flex; align-items: center; gap: 6px; background: var(--surface2); padding: 6px 10px; border-radius: 20px; border: 1px solid var(--border); }
+.user-picker label { font-size: 0.65rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
+.user-picker select { background: transparent; border: none; outline: none; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--ink); cursor: pointer; padding-right: 4px; }
+.notif-bell { position: relative; cursor: pointer; padding: 6px 10px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); font-size: 1rem; transition: all 0.2s; }
+.notif-bell:hover { background: var(--bg); }
+.notif-badge { position: absolute; top: -4px; right: -4px; background: var(--urgent); color: #fff; border-radius: 10px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 0.65rem; font-weight: 700; display: none; align-items: center; justify-content: center; }
 .notif-badge.show { display: flex; }
 .clock-mini { display: flex; flex-direction: column; align-items: flex-end; }
-#hclock { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.95rem; color: var(–ink); font-weight: 500; }
-#hdate { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.6rem; color: var(–muted); }
+#hclock { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; color: var(--ink); font-weight: 500; }
+#hdate { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: var(--muted); }
 
 /* TABS */
-.tabs { display: flex; background: var(–surface); padding: 0 24px; border-bottom: 2px solid var(–border); gap: 4px; overflow-x: auto; }
-.tab { padding: 11px 20px; font-family: ‘Syne’, sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; color: var(–muted); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; border-radius: 4px 4px 0 0; white-space: nowrap; }
-.tab.active { color: var(–accent); border-bottom-color: var(–accent); background: rgba(200,65,10,0.04); }
-.tab:hover:not(.active) { color: var(–ink); background: var(–surface2); }
+.tabs { display: flex; background: var(--surface); padding: 0 24px; border-bottom: 2px solid var(--border); gap: 4px; overflow-x: auto; }
+.tab { padding: 11px 20px; font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; border-radius: 4px 4px 0 0; white-space: nowrap; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(200,65,10,0.04); }
+.tab:hover:not(.active) { color: var(--ink); background: var(--surface2); }
 
 .content { padding: 20px 24px; }
 
 /* DAILY SUMMARY */
 .daily-summary { background: linear-gradient(135deg, #1a2e4a 0%, #2c4567 100%); color: #fff; border-radius: 12px; padding: 16px 22px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 18px; box-shadow: 0 4px 16px rgba(26,46,74,0.15); flex-wrap: wrap; }
-.summary-greeting h2 { font-family: ‘Syne’, sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+.summary-greeting h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
 .summary-greeting p { font-size: 0.82rem; opacity: 0.9; line-height: 1.5; }
 .summary-stats { display: flex; gap: 14px; }
 .summary-stat { text-align: center; padding: 0 12px; border-left: 1px solid rgba(255,255,255,0.2); }
 .summary-stat:first-child { border-left: none; }
-.summary-num { font-family: ‘Syne’, sans-serif; font-size: 1.5rem; font-weight: 800; line-height: 1; }
-.summary-label { font-size: 0.6rem; letter-spacing: 1.2px; text-transform: uppercase; opacity: 0.75; margin-top: 4px; font-family: ‘IBM Plex Mono’, monospace; }
+.summary-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.summary-label { font-size: 0.6rem; letter-spacing: 1.2px; text-transform: uppercase; opacity: 0.75; margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
 
 /* QUICK FILTER PILLS */
 .quick-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.qf-pill { padding: 6px 14px; background: var(–surface); border: 1.5px solid var(–border); border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: ‘Syne’, sans-serif; letter-spacing: 0.5px; }
-.qf-pill:hover { border-color: var(–accent); }
-.qf-pill.active { background: var(–accent); color: #fff; border-color: var(–accent); }
+.qf-pill { padding: 6px 14px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Syne', sans-serif; letter-spacing: 0.5px; }
+.qf-pill:hover { border-color: var(--accent); }
+.qf-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .qf-pill .count { display: inline-block; margin-left: 5px; padding: 1px 7px; background: rgba(0,0,0,0.1); border-radius: 10px; font-size: 0.68rem; }
 .qf-pill.active .count { background: rgba(255,255,255,0.25); }
 
 /* KPI ROW */
 .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
-.kpi-card { background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 14px 16px; border-top: 3px solid var(–border); }
-.kpi-card.red-top { border-top-color: var(–urgent); }
-.kpi-card.blue-top { border-top-color: var(–normal); }
-.kpi-card.gray-top { border-top-color: var(–onhold); }
-.kpi-card.green-top { border-top-color: var(–green); }
-.kpi-label { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.58rem; letter-spacing: 1.3px; text-transform: uppercase; color: var(–muted); margin-bottom: 4px; }
-.kpi-val { font-family: ‘Syne’, sans-serif; font-size: 2rem; font-weight: 800; line-height: 1; color: var(–ink); }
-.kpi-sub { font-size: 0.7rem; color: var(–muted); margin-top: 2px; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; border-top: 3px solid var(--border); }
+.kpi-card.red-top { border-top-color: var(--urgent); }
+.kpi-card.blue-top { border-top-color: var(--normal); }
+.kpi-card.gray-top { border-top-color: var(--onhold); }
+.kpi-card.green-top { border-top-color: var(--green); }
+.kpi-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-val { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1; color: var(--ink); }
+.kpi-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
 
 /* INSIGHTS */
 .insights-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-bottom: 18px; }
-.insight-card { background: var(–surface); border: 1px solid var(–border); border-radius: 10px; padding: 16px 18px; }
-.insight-title { font-family: ‘Syne’, sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.insight-title { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 
 .chart-container { height: 160px; display: flex; align-items: flex-end; gap: 6px; padding: 6px 0 18px 0; position: relative; }
 .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.bar { width: 100%; max-width: 36px; background: linear-gradient(to top, var(–accent), #e57334); border-radius: 4px 4px 0 0; cursor: pointer; position: relative; min-height: 3px; transition: transform 0.2s; }
+.bar { width: 100%; max-width: 36px; background: linear-gradient(to top, var(--accent), #e57334); border-radius: 4px 4px 0 0; cursor: pointer; position: relative; min-height: 3px; transition: transform 0.2s; }
 .bar:hover { transform: translateY(-2px); }
-.bar-tooltip { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: var(–ink); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.68rem; font-family: ‘IBM Plex Mono’, monospace; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.bar-tooltip { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.68rem; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .bar:hover .bar-tooltip { opacity: 1; }
-.bar-label { font-size: 0.62rem; color: var(–muted); font-family: ‘IBM Plex Mono’, monospace; }
+.bar-label { font-size: 0.62rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
 
 .recurring-list { display: flex; flex-direction: column; gap: 6px; }
-.recurring-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(–surface2); border-radius: 6px; border-left: 3px solid var(–accent); }
+.recurring-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--surface2); border-radius: 6px; border-left: 3px solid var(--accent); }
 .recurring-name { font-size: 0.8rem; font-weight: 700; }
-.recurring-meta { font-size: 0.68rem; color: var(–muted); margin-top: 1px; }
-.recurring-count { font-family: ‘Syne’, sans-serif; font-size: 1.3rem; font-weight: 800; color: var(–accent); }
+.recurring-meta { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+.recurring-count { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent); }
 
 /* TOOLBAR */
 .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-.search-box { flex: 1; min-width: 180px; padding: 8px 14px; border: 1px solid var(–border); border-radius: 6px; background: var(–surface); font-size: 0.82rem; outline: none; }
-.search-box:focus { border-color: var(–accent); }
-select.filter-sel { padding: 8px 12px; border: 1px solid var(–border); border-radius: 6px; background: var(–surface); font-family: ‘IBM Plex Mono’, monospace; font-size: 0.7rem; outline: none; cursor: pointer; }
-.btn { padding: 8px 16px; border-radius: 6px; font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
-.btn-primary { background: var(–accent); color: #fff; }
+.search-box { flex: 1; min-width: 180px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.82rem; outline: none; }
+.search-box:focus { border-color: var(--accent); }
+select.filter-sel { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; outline: none; cursor: pointer; }
+.btn { padding: 8px 16px; border-radius: 6px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: #a33408; }
-.btn-outline { background: transparent; border: 1.5px solid var(–border); color: var(–ink); }
-.btn-outline:hover { border-color: var(–ink); }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+.btn-outline:hover { border-color: var(--ink); }
 .btn-sm { padding: 4px 10px; font-size: 0.62rem; border-radius: 4px; }
 
 /* OVERDUE BANNER */
-.overdue-banner { background: rgba(200,65,10,0.08); border: 1px solid rgba(200,65,10,0.3); border-left: 4px solid var(–accent); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.78rem; color: var(–accent); font-weight: 700; }
-.overdue-banner span { font-weight: 400; color: var(–ink); }
+.overdue-banner { background: rgba(200,65,10,0.08); border: 1px solid rgba(200,65,10,0.3); border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.78rem; color: var(--accent); font-weight: 700; }
+.overdue-banner span { font-weight: 400; color: var(--ink); }
 
 /* TABLE */
-.table-wrap { background: var(–surface); border: 1px solid var(–border); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow-x: auto; }
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
-thead { background: var(–ink); }
-th { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.58rem; letter-spacing: 1.3px; text-transform: uppercase; color: #9a9690; padding: 10px 12px; text-align: left; white-space: nowrap; }
-td { padding: 10px 12px; font-size: 0.8rem; border-bottom: 1px solid var(–surface2); vertical-align: middle; }
+thead { background: var(--ink); }
+th { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 1.3px; text-transform: uppercase; color: #9a9690; padding: 10px 12px; text-align: left; white-space: nowrap; }
+td { padding: 10px 12px; font-size: 0.8rem; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
-tr.row-overdue td { background: var(–row-overdue) !important; }
-tr.row-urgent td { background: var(–row-urgent); }
-tr.row-onhold td { background: var(–row-onhold); }
-tr.row-done td { background: var(–row-done); opacity: 0.55; }
+tr.row-overdue td { background: var(--row-overdue) !important; }
+tr.row-urgent td { background: var(--row-urgent); }
+tr.row-onhold td { background: var(--row-onhold); }
+tr.row-done td { background: var(--row-done); opacity: 0.55; }
 tr.row-done .order-id { text-decoration: line-through; }
-tr:hover td { background: var(–surface2) !important; }
-tr.row-overdue td:first-child { border-left: 3px solid var(–accent); }
-tr.row-urgent td:first-child { border-left: 3px solid var(–urgent); }
-tr.row-onhold td:first-child { border-left: 3px solid var(–onhold); }
-tr.row-done td:first-child { border-left: 3px solid var(–green); }
+tr:hover td { background: var(--surface2) !important; }
+tr.row-overdue td:first-child { border-left: 3px solid var(--accent); }
+tr.row-urgent td:first-child { border-left: 3px solid var(--urgent); }
+tr.row-onhold td:first-child { border-left: 3px solid var(--onhold); }
+tr.row-done td:first-child { border-left: 3px solid var(--green); }
 
-.order-id { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.74rem; font-weight: 500; color: var(–accent2); }
-.priority-badge { display: inline-block; padding: 3px 9px; border-radius: 3px; font-family: ‘IBM Plex Mono’, monospace; font-size: 0.58rem; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; }
-.pri-Urgent { background: rgba(200,65,10,0.12); color: var(–urgent); border: 1px solid rgba(200,65,10,0.25); }
-.pri-Normal { background: rgba(183,121,31,0.12); color: var(–normal); border: 1px solid rgba(183,121,31,0.25); }
-.pri-On-Hold { background: rgba(200,114,10,0.12); color: var(–onhold); border: 1px solid rgba(200,114,10,0.25); }
-.status-badge { display: inline-block; padding: 3px 9px; border-radius: 3px; font-family: ‘IBM Plex Mono’, monospace; font-size: 0.58rem; text-transform: uppercase; }
-.st-Pending { background: rgba(183,121,31,0.12); color: var(–yellow); }
-.st-In-Progress { background: rgba(43,108,176,0.12); color: var(–accent2); }
-.st-Completed { background: rgba(39,103,73,0.12); color: var(–green); }
-.st-On-Hold { background: rgba(200,114,10,0.12); color: var(–onhold); }
-.date-cell { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.7rem; line-height: 1.3; }
-.date-cell.overdue { color: var(–accent); font-weight: 700; }
-.days-overdue { display: block; font-size: 0.62rem; font-weight: 700; color: var(–urgent); margin-top: 1px; }
-.days-pending { display: block; font-size: 0.62rem; color: var(–muted); margin-top: 1px; }
-.days-pending.warn { color: var(–accent); font-weight: 700; }
+.order-id { font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 500; color: var(--accent2); }
+.priority-badge { display: inline-block; padding: 3px 9px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; }
+.pri-Urgent { background: rgba(200,65,10,0.12); color: var(--urgent); border: 1px solid rgba(200,65,10,0.25); }
+.pri-Normal { background: rgba(183,121,31,0.12); color: var(--normal); border: 1px solid rgba(183,121,31,0.25); }
+.pri-On-Hold { background: rgba(200,114,10,0.12); color: var(--onhold); border: 1px solid rgba(200,114,10,0.25); }
+.status-badge { display: inline-block; padding: 3px 9px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; text-transform: uppercase; }
+.st-Pending { background: rgba(183,121,31,0.12); color: var(--yellow); }
+.st-In-Progress { background: rgba(43,108,176,0.12); color: var(--accent2); }
+.st-Completed { background: rgba(39,103,73,0.12); color: var(--green); }
+.st-On-Hold { background: rgba(200,114,10,0.12); color: var(--onhold); }
+.date-cell { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; line-height: 1.3; }
+.date-cell.overdue { color: var(--accent); font-weight: 700; }
+.days-overdue { display: block; font-size: 0.62rem; font-weight: 700; color: var(--urgent); margin-top: 1px; }
+.days-pending { display: block; font-size: 0.62rem; color: var(--muted); margin-top: 1px; }
+.days-pending.warn { color: var(--accent); font-weight: 700; }
 .assignee-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 0.76rem; }
-.assignee-avatar { width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: ‘Syne’, sans-serif; }
+.assignee-avatar { width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; }
 .action-btns { display: flex; gap: 4px; }
 
 /* MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(26,24,20,0.6); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); padding: 12px; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(–surface); border-radius: 12px; padding: 22px 24px; width: 680px; max-width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
-.modal-title { font-family: ‘Syne’, sans-serif; font-size: 1.05rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(–border); }
+.modal { background: var(--surface); border-radius: 12px; padding: 22px 24px; width: 680px; max-width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-group { display: flex; flex-direction: column; gap: 4px; }
 .form-group.full { grid-column: 1 / -1; }
-.form-label { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(–muted); }
-.form-input, .form-select, .form-textarea { padding: 8px 12px; border: 1px solid var(–border); border-radius: 6px; background: var(–bg); font-family: ‘Lato’, sans-serif; font-size: 0.82rem; outline: none; }
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(–accent); }
+.form-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.form-input, .form-select, .form-textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); font-family: 'Lato', sans-serif; font-size: 0.82rem; outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
 .form-textarea { resize: vertical; min-height: 64px; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(–border); flex-wrap: wrap; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 
 /* PHOTO */
-.photo-upload-area { border: 2px dashed var(–border); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; background: var(–bg); }
-.photo-upload-area:hover { border-color: var(–accent); }
+.photo-upload-area { border: 2px dashed var(--border); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; background: var(--bg); }
+.photo-upload-area:hover { border-color: var(--accent); }
 .photo-upload-area input[type=file] { display: none; }
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; margin-top: 8px; }
-.photo-thumb { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(–border); cursor: pointer; }
+.photo-thumb { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .photo-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; }
 
 /* COMMENTS */
-.comments-section { grid-column: 1/-1; padding-top: 10px; border-top: 1px solid var(–border); }
-.comments-title { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(–muted); margin-bottom: 8px; }
+.comments-section { grid-column: 1/-1; padding-top: 10px; border-top: 1px solid var(--border); }
+.comments-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .comments-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-bottom: 10px; }
-.comment { background: var(–surface2); border-radius: 6px; padding: 8px 12px; border-left: 3px solid var(–accent2); }
-.comment-meta { font-size: 0.66rem; color: var(–muted); font-family: ‘IBM Plex Mono’, monospace; margin-bottom: 4px; }
+.comment { background: var(--surface2); border-radius: 6px; padding: 8px 12px; border-left: 3px solid var(--accent2); }
+.comment-meta { font-size: 0.66rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-bottom: 4px; }
 .comment-text { font-size: 0.8rem; line-height: 1.4; }
-.comment-text .mention { background: rgba(43,108,176,0.15); color: var(–accent2); padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+.comment-text .mention { background: rgba(43,108,176,0.15); color: var(--accent2); padding: 1px 5px; border-radius: 3px; font-weight: 700; }
 .comment-input-row { display: flex; gap: 6px; }
-.comment-input { flex: 1; padding: 8px 12px; border: 1px solid var(–border); border-radius: 6px; font-size: 0.82rem; outline: none; }
-.comment-input:focus { border-color: var(–accent); }
+.comment-input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.82rem; outline: none; }
+.comment-input:focus { border-color: var(--accent); }
 
 /* ACTIVITY LOG */
-.activity-section { grid-column: 1/-1; padding-top: 10px; border-top: 1px solid var(–border); }
+.activity-section { grid-column: 1/-1; padding-top: 10px; border-top: 1px solid var(--border); }
 .activity-list { max-height: 160px; overflow-y: auto; }
-.activity-item { font-size: 0.74rem; padding: 5px 0; border-bottom: 1px dashed var(–surface2); display: flex; gap: 8px; align-items: baseline; }
+.activity-item { font-size: 0.74rem; padding: 5px 0; border-bottom: 1px dashed var(--surface2); display: flex; gap: 8px; align-items: baseline; }
 .activity-item:last-child { border: none; }
-.activity-time { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.66rem; color: var(–muted); white-space: nowrap; }
-.activity-text { color: var(–ink); }
-.activity-text strong { color: var(–accent2); }
+.activity-time { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--muted); white-space: nowrap; }
+.activity-text { color: var(--ink); }
+.activity-text strong { color: var(--accent2); }
 
 /* FAB */
-.fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(–accent); color: #fff; border: none; box-shadow: 0 6px 20px rgba(200,65,10,0.4); cursor: pointer; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 50; }
+.fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; border: none; box-shadow: 0 6px 20px rgba(200,65,10,0.4); cursor: pointer; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 50; }
 .fab:hover { transform: scale(1.08); box-shadow: 0 8px 24px rgba(200,65,10,0.5); }
 
 /* AUTOSAVE */
-.autosave-indicator { position: fixed; bottom: 20px; left: 20px; background: var(–green); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.7rem; font-family: ‘IBM Plex Mono’, monospace; opacity: 0; transition: opacity 0.3s; z-index: 50; box-shadow: 0 4px 12px rgba(39,103,73,0.3); }
+.autosave-indicator { position: fixed; bottom: 20px; left: 20px; background: var(--green); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.7rem; font-family: 'IBM Plex Mono', monospace; opacity: 0; transition: opacity 0.3s; z-index: 50; box-shadow: 0 4px 12px rgba(39,103,73,0.3); }
 .autosave-indicator.show { opacity: 1; }
 
 /* NOTIFICATIONS */
 #notification-area { position: fixed; top: 80px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 10px; max-width: 340px; }
-.notification { background: var(–surface); border: 1px solid var(–border); border-left: 4px solid var(–urgent); border-radius: 8px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: slideInRight 0.3s ease; cursor: pointer; }
-.notification.success { border-left-color: var(–green); }
-.notification.warning { border-left-color: var(–yellow); }
+.notification { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--urgent); border-radius: 8px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: slideInRight 0.3s ease; cursor: pointer; }
+.notification.success { border-left-color: var(--green); }
+.notification.warning { border-left-color: var(--yellow); }
 @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .notif-title { font-weight: 700; font-size: 0.82rem; margin-bottom: 3px; }
-.notif-msg { font-size: 0.74rem; color: var(–muted); line-height: 1.4; }
+.notif-msg { font-size: 0.74rem; color: var(--muted); line-height: 1.4; }
 
 /* NOTIF DROPDOWN */
-.notif-dropdown { position: fixed; top: 70px; right: 16px; width: 340px; max-height: 480px; background: var(–surface); border: 1px solid var(–border); border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); z-index: 150; display: none; overflow: hidden; }
+.notif-dropdown { position: fixed; top: 70px; right: 16px; width: 340px; max-height: 480px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); z-index: 150; display: none; overflow: hidden; }
 .notif-dropdown.open { display: flex; flex-direction: column; }
-.notif-dropdown-header { padding: 12px 16px; background: var(–surface2); border-bottom: 1px solid var(–border); font-family: ‘Syne’, sans-serif; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
-.notif-dropdown-header button { background: transparent; border: none; color: var(–accent2); font-size: 0.7rem; cursor: pointer; font-family: ‘IBM Plex Mono’, monospace; text-transform: uppercase; }
+.notif-dropdown-header { padding: 12px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+.notif-dropdown-header button { background: transparent; border: none; color: var(--accent2); font-size: 0.7rem; cursor: pointer; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; }
 .notif-dropdown-list { flex: 1; overflow-y: auto; padding: 6px; }
-.notif-row { padding: 10px 12px; border-radius: 6px; cursor: pointer; border-left: 3px solid var(–border); margin-bottom: 4px; }
-.notif-row:hover { background: var(–surface2); }
-.notif-row.unread { background: rgba(43,108,176,0.05); border-left-color: var(–accent2); }
-.notif-row.urgent { border-left-color: var(–urgent); }
+.notif-row { padding: 10px 12px; border-radius: 6px; cursor: pointer; border-left: 3px solid var(--border); margin-bottom: 4px; }
+.notif-row:hover { background: var(--surface2); }
+.notif-row.unread { background: rgba(43,108,176,0.05); border-left-color: var(--accent2); }
+.notif-row.urgent { border-left-color: var(--urgent); }
 .notif-row-title { font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; }
-.notif-row-msg { font-size: 0.7rem; color: var(–muted); line-height: 1.3; }
-.notif-row-time { font-size: 0.62rem; color: var(–muted); font-family: ‘IBM Plex Mono’, monospace; margin-top: 4px; }
+.notif-row-msg { font-size: 0.7rem; color: var(--muted); line-height: 1.3; }
+.notif-row-time { font-size: 0.62rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
 
 /* LIGHTBOX */
 .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; display: none; align-items: center; justify-content: center; cursor: pointer; }
@@ -233,100 +231,98 @@ tr.row-done td:first-child { border-left: 3px solid var(–green); }
 
 /* MOBILE */
 @media (max-width: 768px) {
-body { padding-bottom: 90px; }
-.header { padding: 10px 12px; flex-wrap: nowrap; gap: 8px; }
-.header-left { flex: 1; min-width: 0; gap: 10px; }
-.header-logo img { width: 38px !important; height: 38px !important; }
-.brand-name { font-size: 0.9rem; }
-.brand-title { font-size: 0.62rem; letter-spacing: 1px; }
-.header-sub { display: none; }
-.clock-mini { display: none; }
-.header-right { gap: 6px; flex-shrink: 0; }
-.user-picker { padding: 4px 8px; }
-.user-picker label { display: none; }
-.user-picker select { font-size: 0.75rem; max-width: 80px; }
-.notif-bell { padding: 4px 8px; font-size: 0.9rem; }
-
-.tabs { padding: 0 12px; }
-.tab { padding: 10px 14px; font-size: 0.7rem; letter-spacing: 1px; }
-.tab[onclick*=“Weekly”], .tab[onclick*=“Sync”] { margin-left: 0 !important; padding: 10px 10px; font-size: 0.65rem; }
-
-.content { padding: 12px; }
-
-.daily-summary { padding: 14px 16px; flex-direction: column !important; align-items: stretch !important; gap: 14px; display: flex !important; }
-.summary-greeting h2 { font-size: 1.05rem; }
-.summary-greeting p { font-size: 0.78rem; }
-.summary-stats { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.summary-stat { padding: 8px 4px !important; border: none !important; background: rgba(255,255,255,0.08); border-radius: 6px; }
-.summary-num { font-size: 1.15rem; }
-.summary-label { font-size: 0.55rem; letter-spacing: 0.8px; }
-
-.quick-filters { gap: 6px; }
-.qf-pill { padding: 6px 10px; font-size: 0.68rem; }
-
-.kpi-row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
-.kpi-card { padding: 12px 14px; }
-.kpi-val { font-size: 1.7rem; }
-.kpi-label { font-size: 0.55rem; }
-.kpi-sub { font-size: 0.65rem; }
-
-.insights-row { display: grid !important; grid-template-columns: 1fr !important; gap: 12px; }
-.insight-card { padding: 14px; }
-.insight-title { font-size: 0.75rem; }
-.chart-container { height: 140px; }
-
-.toolbar { gap: 6px; }
-.search-box { min-width: 100%; flex-basis: 100%; }
-.filter-sel, .toolbar .btn { flex: 1; min-width: 0; }
-.btn { padding: 7px 10px; font-size: 0.62rem; letter-spacing: 0.8px; }
-
-table { min-width: 700px; }
-th, td { padding: 8px 10px; font-size: 0.74rem; }
-
-.modal { padding: 18px; max-height: 95vh; border-radius: 10px; }
-.modal-title { font-size: 0.95rem; }
-.form-grid { grid-template-columns: 1fr !important; }
-.modal-actions { flex-wrap: wrap; }
-.modal-actions .btn { flex: 1; min-width: 100px; }
-.modal-actions .btn[onclick*=“emailOrder”] { margin-right: 0 !important; flex-basis: 100%; }
-
-.fab { width: 56px; height: 56px; bottom: 16px; right: 16px; font-size: 1.8rem; }
-.notif-dropdown { right: 8px; left: 8px; width: auto; top: 60px; max-height: 70vh; }
-#notification-area { right: 8px; left: 8px; max-width: none; top: 60px; }
-.autosave-indicator { bottom: 80px; left: 16px; }
-
-.report-content { padding: 20px; max-height: 95vh; }
+  body { padding-bottom: 90px; }
+  .header { padding: 10px 12px; flex-wrap: nowrap; gap: 8px; }
+  .header-left { flex: 1; min-width: 0; gap: 10px; }
+  .header-logo img { width: 38px !important; height: 38px !important; }
+  .brand-name { font-size: 0.9rem; }
+  .brand-title { font-size: 0.62rem; letter-spacing: 1px; }
+  .header-sub { display: none; }
+  .clock-mini { display: none; }
+  .header-right { gap: 6px; flex-shrink: 0; }
+  .user-picker { padding: 4px 8px; }
+  .user-picker label { display: none; }
+  .user-picker select { font-size: 0.75rem; max-width: 80px; }
+  .notif-bell { padding: 4px 8px; font-size: 0.9rem; }
+  
+  .tabs { padding: 0 12px; }
+  .tab { padding: 10px 14px; font-size: 0.7rem; letter-spacing: 1px; }
+  .tab[onclick*="Weekly"], .tab[onclick*="Sync"] { margin-left: 0 !important; padding: 10px 10px; font-size: 0.65rem; }
+  
+  .content { padding: 12px; }
+  
+  .daily-summary { padding: 14px 16px; flex-direction: column !important; align-items: stretch !important; gap: 14px; display: flex !important; }
+  .summary-greeting h2 { font-size: 1.05rem; }
+  .summary-greeting p { font-size: 0.78rem; }
+  .summary-stats { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .summary-stat { padding: 8px 4px !important; border: none !important; background: rgba(255,255,255,0.08); border-radius: 6px; }
+  .summary-num { font-size: 1.15rem; }
+  .summary-label { font-size: 0.55rem; letter-spacing: 0.8px; }
+  
+  .quick-filters { gap: 6px; }
+  .qf-pill { padding: 6px 10px; font-size: 0.68rem; }
+  
+  .kpi-row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .kpi-card { padding: 12px 14px; }
+  .kpi-val { font-size: 1.7rem; }
+  .kpi-label { font-size: 0.55rem; }
+  .kpi-sub { font-size: 0.65rem; }
+  
+  .insights-row { display: grid !important; grid-template-columns: 1fr !important; gap: 12px; }
+  .insight-card { padding: 14px; }
+  .insight-title { font-size: 0.75rem; }
+  .chart-container { height: 140px; }
+  
+  .toolbar { gap: 6px; }
+  .search-box { min-width: 100%; flex-basis: 100%; }
+  .filter-sel, .toolbar .btn { flex: 1; min-width: 0; }
+  .btn { padding: 7px 10px; font-size: 0.62rem; letter-spacing: 0.8px; }
+  
+  table { min-width: 700px; }
+  th, td { padding: 8px 10px; font-size: 0.74rem; }
+  
+  .modal { padding: 18px; max-height: 95vh; border-radius: 10px; }
+  .modal-title { font-size: 0.95rem; }
+  .form-grid { grid-template-columns: 1fr !important; }
+  .modal-actions { flex-wrap: wrap; }
+  .modal-actions .btn { flex: 1; min-width: 100px; }
+  .modal-actions .btn[onclick*="emailOrder"] { margin-right: 0 !important; flex-basis: 100%; }
+  
+  .fab { width: 56px; height: 56px; bottom: 16px; right: 16px; font-size: 1.8rem; }
+  .notif-dropdown { right: 8px; left: 8px; width: auto; top: 60px; max-height: 70vh; }
+  #notification-area { right: 8px; left: 8px; max-width: none; top: 60px; }
+  .autosave-indicator { bottom: 80px; left: 16px; }
+  
+  .report-content { padding: 20px; max-height: 95vh; }
 }
 
 @media (max-width: 420px) {
-.summary-stats { grid-template-columns: repeat(2, 1fr) !important; }
-.kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
+  .summary-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 @media print {
-.tabs, .toolbar, .action-btns, .modal-overlay, .header, #notification-area, .autosave-indicator, .insights-row, .daily-summary, .quick-filters, .fab, .notif-dropdown { display: none !important; }
-body { background: #fff; padding: 20px; }
-.table-wrap { box-shadow: none; border: 1px solid #ccc; }
+  .tabs, .toolbar, .action-btns, .modal-overlay, .header, #notification-area, .autosave-indicator, .insights-row, .daily-summary, .quick-filters, .fab, .notif-dropdown { display: none !important; }
+  body { background: #fff; padding: 20px; }
+  .table-wrap { box-shadow: none; border: 1px solid #ccc; }
 }
 
 /* WEEKLY REPORT */
 #report-modal { display: none; }
 #report-modal.open { display: flex; }
 .report-content { max-width: 700px; width: 100%; max-height: 92vh; overflow-y: auto; background: #fff; border-radius: 12px; padding: 28px; }
-.report-section { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(–border); }
-.report-section h3 { font-family: ‘Syne’, sans-serif; font-size: 0.95rem; margin-bottom: 8px; color: var(–accent); }
+.report-section { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.report-section h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; margin-bottom: 8px; color: var(--accent); }
 .report-section ul { list-style: none; padding: 0; }
 .report-section li { padding: 5px 0; font-size: 0.85rem; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.3s ease forwards; }
 </style>
-
 </head>
 <body>
 
 <!-- HEADER -->
-
 <div class="header">
   <div class="header-left">
     <div class="header-logo">
@@ -335,7 +331,7 @@ body { background: #fff; padding: 20px; }
     <div>
       <div class="brand-name">BVGlazing Systems</div>
       <div class="brand-title">Order Tracker</div>
-      <div class="header-sub">131 Caldari Road, Concord, ON</div>
+      <div class="header-sub">131 Caldari Road, Concord, ON · ☁️ Cloud Synced</div>
     </div>
   </div>
   <div class="header-right">
@@ -355,7 +351,6 @@ body { background: #fff; padding: 20px; }
 </div>
 
 <!-- TABS -->
-
 <div class="tabs">
   <div class="tab active" onclick="switchTab('backorders')">Back Orders</div>
   <div class="tab" onclick="switchTab('serviceorders')">Service Orders</div>
@@ -366,19 +361,15 @@ body { background: #fff; padding: 20px; }
 <div class="content">
 
   <!-- DAILY SUMMARY -->
-
   <div class="daily-summary" id="daily-summary"></div>
 
   <!-- QUICK FILTERS -->
-
   <div class="quick-filters" id="quick-filters"></div>
 
   <!-- KPI ROW -->
-
   <div class="kpi-row" id="kpi-row"></div>
 
   <!-- INSIGHTS -->
-
   <div class="insights-row">
     <div class="insight-card">
       <div class="insight-title">📊 Weekly Trend — Completed Orders (Last 7 Days)</div>
@@ -391,11 +382,9 @@ body { background: #fff; padding: 20px; }
   </div>
 
   <!-- OVERDUE BANNER -->
-
   <div class="overdue-banner" id="overdue-banner" style="display:none">⚠ <span id="overdue-text"></span></div>
 
   <!-- TOOLBAR -->
-
   <div class="toolbar">
     <input class="search-box" type="text" id="search-input" placeholder="🔍 Search…" oninput="renderTable()">
     <select class="filter-sel" id="filter-priority" onchange="renderTable()">
@@ -405,20 +394,18 @@ body { background: #fff; padding: 20px; }
       <option value="">All Statuses</option><option>Pending</option><option>In-Progress</option><option>Completed</option><option>On-Hold</option>
     </select>
     <button class="btn btn-outline" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn btn-outline" onclick="manualSync()" title="Refresh from cloud">☁ Sync Now</button>
     <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
   </div>
 
   <!-- TABLE -->
-
   <div class="table-wrap"><table><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
 </div>
 
 <!-- FAB -->
-
 <button class="fab" onclick="openModal()" title="New Order">+</button>
 
 <!-- MODAL -->
-
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title" id="modal-title">New Back Order</div>
@@ -432,21 +419,20 @@ body { background: #fff; padding: 20px; }
 </div>
 
 <!-- WEEKLY REPORT MODAL -->
-
 <div class="modal-overlay" id="report-modal" onclick="if(event.target===this)closeReportModal()">
   <div class="report-content" onclick="event.stopPropagation()">
     <div class="modal-title">📊 Weekly Report</div>
     <div id="report-body"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="emailWeeklyReport()">✉ Email to Manager</button>
-      <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+      <button class="btn btn-outline" onclick="manualSync()" title="Refresh from cloud">☁ Sync Now</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
       <button class="btn btn-primary" onclick="closeReportModal()">Close</button>
     </div>
   </div>
 </div>
 
 <!-- SYNC MODAL -->
-
 <div class="modal-overlay" id="sync-modal" onclick="if(event.target===this)closeSyncModal()">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
     <div class="modal-title">☁️ Sync Across Devices</div>
@@ -469,7 +455,6 @@ body { background: #fff; padding: 20px; }
 </div>
 
 <!-- NOTIF DROPDOWN -->
-
 <div class="notif-dropdown" id="notif-dropdown">
   <div class="notif-dropdown-header">
     Notifications
@@ -490,8 +475,12 @@ const STATUSES    = ['Pending','In-Progress','Completed','On-Hold'];
 const ISSUE_TYPES = ['Installation Issue','Damaged on Delivery','Missing Parts','Warranty Repair','Measurement Error','Hardware Defect'];
 const TEAM        = ['Abhay','Firas','Derek M.','James T.','Carlos R.','Sara K.','Mike P.'];
 const PRIORITY_WEIGHT = { Urgent:0, Normal:1, 'On Hold':2 };
-const STORAGE_KEY = 'bvg_order_tracker_v4';
+const STORAGE_KEY = 'bvg_order_tracker_v5';
 const USER_KEY = 'bvg_current_user';
+const CLOUD_URL = 'https://script.google.com/macros/s/AKfycby75t3rKG5TzQz020YxqLZk-_5afSyoewgc7YgjJu5v9pUi1fGkkRbfph0V3KaCCHSN/exec';
+let cloudSyncEnabled = true;
+let lastCloudSync = null;
+let pendingCloudSave = false;
 
 // Avatar colors per user
 const USER_COLORS = { 'Abhay':'#c8410a','Firas':'#2b6cb0','Derek M.':'#276749','James T.':'#b7791f','Carlos R.':'#7c3aed','Sara K.':'#db2777','Mike P.':'#0891b2' };
@@ -541,10 +530,164 @@ function loadData() {
   } catch(e) { console.error(e); }
   return false;
 }
+
+// ─── CLOUD SYNC (Google Sheets) ─────────────────────────
+async function cloudLoad() {
+  if (!cloudSyncEnabled || !CLOUD_URL) return false;
+  try {
+    showCloudStatus('Loading from cloud...', 'loading');
+    const res = await fetch(CLOUD_URL);
+    const data = await res.json();
+    if (data.orders) {
+      const newBO = [];
+      const newSO = [];
+      data.orders.forEach(o => {
+        // Reconstruct full order from flat sheet row
+        const reconstructed = {
+          id: o.id || '',
+          jobCode: o.jobCode || '',
+          workOrder: o.workOrder || '',
+          projectName: o.projectName || '',
+          floor: o.floor || '',
+          windowDoorNum: o.windowDoorNum || '',
+          product: o.product || '',
+          dueDate: o.dueDate ? formatDateFromSheet(o.dueDate) : '',
+          priority: o.priority || 'Normal',
+          status: o.status || 'Pending',
+          assignee: o.assignee || '',
+          reason: o.reason || '',
+          // Keep local fields if order existed
+          photos: [], comments: [], activity: [], createdAt: ''
+        };
+        // Try to preserve local-only fields by matching id
+        const existingBO = backOrders.find(x => x.id === reconstructed.id);
+        const existingSO = serviceOrders.find(x => x.id === reconstructed.id);
+        const existing = existingBO || existingSO;
+        if (existing) {
+          reconstructed.photos = existing.photos || [];
+          reconstructed.comments = existing.comments || [];
+          reconstructed.activity = existing.activity || [];
+          reconstructed.createdAt = existing.createdAt || '';
+          reconstructed.completedAt = existing.completedAt;
+          if (!reconstructed.completedAt && reconstructed.status === 'Completed') reconstructed.completedAt = new Date().toISOString();
+        } else if (reconstructed.status === 'Completed') {
+          reconstructed.completedAt = new Date().toISOString();
+        }
+        if (!reconstructed.createdAt) reconstructed.createdAt = new Date().toISOString().slice(0,10);
+        
+        if (o.type === 'service' || (reconstructed.id && reconstructed.id.startsWith('SO'))) {
+          // Map back-order fields to service-order fields where applicable
+          reconstructed.client = reconstructed.projectName;
+          reconstructed.issueType = reconstructed.product || 'Installation Issue';
+          reconstructed.technician = reconstructed.assignee;
+          reconstructed.notes = reconstructed.reason;
+          newSO.push(reconstructed);
+        } else {
+          newBO.push(reconstructed);
+        }
+      });
+      backOrders = newBO;
+      serviceOrders = newSO;
+      lastCloudSync = new Date();
+      showCloudStatus('✓ Synced just now', 'success');
+      return true;
+    }
+  } catch(e) {
+    console.error('Cloud load failed:', e);
+    showCloudStatus('⚠ Offline mode', 'error');
+  }
+  return false;
+}
+
+async function cloudSave() {
+  if (!cloudSyncEnabled || !CLOUD_URL) return;
+  if (pendingCloudSave) return;
+  pendingCloudSave = true;
+  try {
+    showCloudStatus('Saving to cloud...', 'loading');
+    // Combine both lists into a single flat list with type marker
+    const allOrders = [
+      ...backOrders.map(o => ({ ...flattenOrder(o), type: 'back' })),
+      ...serviceOrders.map(o => ({ ...flattenOrder(o), type: 'service' }))
+    ];
+    await fetch(CLOUD_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action: 'saveAll', orders: allOrders })
+    });
+    lastCloudSync = new Date();
+    showCloudStatus('✓ Saved to cloud', 'success');
+  } catch(e) {
+    console.error('Cloud save failed:', e);
+    showCloudStatus('⚠ Save failed', 'error');
+  } finally {
+    pendingCloudSave = false;
+  }
+}
+
+function flattenOrder(o) {
+  // For service orders, map their fields to common columns
+  return {
+    id: o.id || '',
+    jobCode: o.jobCode || '',
+    workOrder: o.workOrder || '',
+    projectName: o.projectName || o.client || '',
+    floor: o.floor || '',
+    windowDoorNum: o.windowDoorNum || '',
+    product: o.product || o.issueType || '',
+    dueDate: o.dueDate || '',
+    priority: o.priority || '',
+    status: o.status || '',
+    assignee: o.assignee || o.technician || '',
+    reason: o.reason || o.notes || ''
+  };
+}
+
+function formatDateFromSheet(d) {
+  if (!d) return '';
+  if (typeof d === 'string' && d.match(/^\d{4}-\d{2}-\d{2}/)) return d.slice(0,10);
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return dt.toISOString().slice(0,10);
+  } catch(e) { return d; }
+}
+
+function showCloudStatus(msg, type) {
+  let el = document.getElementById('cloud-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'cloud-status';
+    el.style.cssText = 'position:fixed;bottom:20px;left:20px;padding:6px 14px;border-radius:20px;font-size:0.7rem;font-family:IBM Plex Mono,monospace;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:all 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  if (type === 'success') { el.style.background = 'var(--green)'; el.style.color = '#fff'; }
+  else if (type === 'loading') { el.style.background = 'var(--accent2)'; el.style.color = '#fff'; }
+  else if (type === 'error') { el.style.background = 'var(--urgent)'; el.style.color = '#fff'; }
+  el.style.opacity = '1';
+  clearTimeout(showCloudStatus._t);
+  showCloudStatus._t = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+// Manual sync button
+async function manualSync() {
+  await cloudSave();
+  await cloudLoad();
+  saveData();
+  renderAll();
+  pushNotification('☁️ Synced', 'Data refreshed from cloud.', 'success');
+}
+
+
 function saveData() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ backOrders, serviceOrders, notifications, savedAt:new Date().toISOString() }));
     showAutosave();
+    // Debounced cloud sync
+    clearTimeout(saveData._cloudTimer);
+    saveData._cloudTimer = setTimeout(cloudSave, 1500);
   } catch(e) { alert('Save failed - storage may be full.'); }
 }
 function showAutosave() {
@@ -974,305 +1117,388 @@ function openModal(prefill = null) {
       <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${staOpts}</select></div>
       <div class="form-group full"><label class="form-label">Assigned To</label><select class="form-select" id="f-assignee">${teamOpts}</select></div>
       <div class="form-group full"><label class="form-label">Reason</label><textarea class="form-textarea" id="f-reason">${prefill?.reason||''}</textarea></div>
-
-```
-  ${photoSection()}
-  ${commentSection()}
-  ${activitySection()}
-`;
-```
-
-} else {
-f.innerHTML = ` <input type="hidden" id="f-id" value="${prefill?.id || genId('SO')}"> <div class="form-group"><label class="form-label">Job Code</label><input class="form-input" id="f-jobCode" value="${prefill?.jobCode||''}"></div> <div class="form-group"><label class="form-label">Client Name</label><input class="form-input" id="f-client" value="${prefill?.client||''}"></div> <div class="form-group"><label class="form-label">Issue Type</label><select class="form-select" id="f-issueType">${ISSUE_TYPES.map(t=>`<option ${prefill?.issueType===t?‘selected’:’’}>${t}</option>`).join('')}</select></div> <div class="form-group"><label class="form-label">Technician</label><input class="form-input" id="f-technician" value="${prefill?.technician||''}"></div> <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="f-dueDate" type="date" value="${prefill?.dueDate||''}"></div> <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority">${priOpts}</select></div> <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${staOpts}</select></div> <div class="form-group"><label class="form-label">Assigned To</label><select class="form-select" id="f-assignee">${teamOpts}</select></div> <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" id="f-notes">${prefill?.notes||''}</textarea></div> ${photoSection()} ${commentSection()} ${activitySection()} `;
-}
-renderPhotos();
-renderComments();
-renderActivity();
-document.getElementById(‘modal-overlay’).classList.add(‘open’);
+      ${photoSection()}
+      ${commentSection()}
+      ${activitySection()}
+    `;
+  } else {
+    f.innerHTML = `
+      <input type="hidden" id="f-id" value="${prefill?.id || genId('SO')}">
+      <div class="form-group"><label class="form-label">Job Code</label><input class="form-input" id="f-jobCode" value="${prefill?.jobCode||''}"></div>
+      <div class="form-group"><label class="form-label">Client Name</label><input class="form-input" id="f-client" value="${prefill?.client||''}"></div>
+      <div class="form-group"><label class="form-label">Issue Type</label><select class="form-select" id="f-issueType">${ISSUE_TYPES.map(t=>`<option ${prefill?.issueType===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Technician</label><input class="form-input" id="f-technician" value="${prefill?.technician||''}"></div>
+      <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="f-dueDate" type="date" value="${prefill?.dueDate||''}"></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority">${priOpts}</select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${staOpts}</select></div>
+      <div class="form-group"><label class="form-label">Assigned To</label><select class="form-select" id="f-assignee">${teamOpts}</select></div>
+      <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" id="f-notes">${prefill?.notes||''}</textarea></div>
+      ${photoSection()}
+      ${commentSection()}
+      ${activitySection()}
+    `;
+  }
+  renderPhotos();
+  renderComments();
+  renderActivity();
+  document.getElementById('modal-overlay').classList.add('open');
 }
 
 function photoSection() {
-return `<div class="form-group full"> <label class="form-label">Photos</label> <label class="photo-upload-area"> <div style="font-size:1.5rem">📷</div> <div style="font-size:0.78rem;color:var(--muted)">Tap to add photos (camera or gallery)</div> <input type="file" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(event)"> </label> <div class="photo-grid" id="photo-grid"></div> </div>`;
+  return `
+    <div class="form-group full">
+      <label class="form-label">Photos</label>
+      <label class="photo-upload-area">
+        <div style="font-size:1.5rem">📷</div>
+        <div style="font-size:0.78rem;color:var(--muted)">Tap to add photos (camera or gallery)</div>
+        <input type="file" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(event)">
+      </label>
+      <div class="photo-grid" id="photo-grid"></div>
+    </div>
+  `;
 }
 function commentSection() {
-return `<div class="comments-section"> <div class="comments-title">💬 Comments (use @name to tag, e.g. @Firas)</div> <div class="comments-list" id="comments-list"></div> <div class="comment-input-row"> <input class="comment-input" id="comment-input" placeholder="Add a comment… use @name to tag" onkeydown="if(event.key==='Enter')addComment()"> <button class="btn btn-primary btn-sm" onclick="addComment()">Add</button> </div> </div>`;
+  return `
+    <div class="comments-section">
+      <div class="comments-title">💬 Comments (use @name to tag, e.g. @Firas)</div>
+      <div class="comments-list" id="comments-list"></div>
+      <div class="comment-input-row">
+        <input class="comment-input" id="comment-input" placeholder="Add a comment… use @name to tag" onkeydown="if(event.key==='Enter')addComment()">
+        <button class="btn btn-primary btn-sm" onclick="addComment()">Add</button>
+      </div>
+    </div>
+  `;
 }
 function activitySection() {
-return `<div class="activity-section"> <div class="comments-title">📝 Activity Log</div> <div class="activity-list" id="activity-list"></div> </div>`;
+  return `
+    <div class="activity-section">
+      <div class="comments-title">📝 Activity Log</div>
+      <div class="activity-list" id="activity-list"></div>
+    </div>
+  `;
 }
 
 function handlePhotoUpload(e) {
-const files = Array.from(e.target.files);
-files.forEach(file => {
-if (currentPhotos.length >= 6) { alert(‘Max 6 photos.’); return; }
-const reader = new FileReader();
-reader.onload = (evt) => { currentPhotos.push({ data: evt.target.result, name: file.name }); renderPhotos(); };
-reader.readAsDataURL(file);
-});
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    if (currentPhotos.length >= 6) { alert('Max 6 photos.'); return; }
+    const reader = new FileReader();
+    reader.onload = (evt) => { currentPhotos.push({ data: evt.target.result, name: file.name }); renderPhotos(); };
+    reader.readAsDataURL(file);
+  });
 }
 function renderPhotos() {
-const g = document.getElementById(‘photo-grid’); if (!g) return;
-g.innerHTML = currentPhotos.map((p, i) => `<div class="photo-thumb" onclick="openLightbox('${p.data}')"> <img src="${p.data}"> <button class="photo-remove" onclick="event.stopPropagation();removePhoto(${i})">✕</button> </div>`).join(’’);
+  const g = document.getElementById('photo-grid'); if (!g) return;
+  g.innerHTML = currentPhotos.map((p, i) => `
+    <div class="photo-thumb" onclick="openLightbox('${p.data}')">
+      <img src="${p.data}">
+      <button class="photo-remove" onclick="event.stopPropagation();removePhoto(${i})">✕</button>
+    </div>
+  `).join('');
 }
 function removePhoto(i) { currentPhotos.splice(i, 1); renderPhotos(); }
-function openLightbox(src) { document.getElementById(‘lightbox-img’).src = src; document.getElementById(‘lightbox’).classList.add(‘open’); }
-function closeLightbox() { document.getElementById(‘lightbox’).classList.remove(‘open’); }
+function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
 
 function addComment() {
-const input = document.getElementById(‘comment-input’);
-const text = input.value.trim();
-if (!text) return;
-// Detect @mentions
-const mentions = (text.match(/@(\w+(\s\w.)?)/g) || []).map(m => m.slice(1));
-currentComments.push({ text, author: currentUser, at: new Date().toISOString(), mentions });
-// Notify mentioned users
-mentions.forEach(mention => {
-const user = TEAM.find(t => t.toLowerCase().startsWith(mention.toLowerCase()));
-if (user && user !== currentUser) {
-notifications.unshift({ id: Date.now()+Math.random(), title: `📨 You were tagged by ${currentUser}`, msg: `On ${editingId || 'a new order'}: "${text}"`, type: ‘success’, at: new Date().toISOString(), read: false, user });
-}
-});
-currentActivity.push({ at: new Date().toISOString(), user: currentUser, text: `commented: "${text.slice(0,50)}${text.length>50?'…':''}"` });
-input.value = ‘’;
-renderComments();
-renderActivity();
+  const input = document.getElementById('comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  // Detect @mentions
+  const mentions = (text.match(/@(\w+(\s\w\.)?)/g) || []).map(m => m.slice(1));
+  currentComments.push({ text, author: currentUser, at: new Date().toISOString(), mentions });
+  // Notify mentioned users
+  mentions.forEach(mention => {
+    const user = TEAM.find(t => t.toLowerCase().startsWith(mention.toLowerCase()));
+    if (user && user !== currentUser) {
+      notifications.unshift({ id: Date.now()+Math.random(), title: `📨 You were tagged by ${currentUser}`, msg: `On ${editingId || 'a new order'}: "${text}"`, type: 'success', at: new Date().toISOString(), read: false, user });
+    }
+  });
+  currentActivity.push({ at: new Date().toISOString(), user: currentUser, text: `commented: "${text.slice(0,50)}${text.length>50?'…':''}"` });
+  input.value = '';
+  renderComments();
+  renderActivity();
 }
 function renderComments() {
-const list = document.getElementById(‘comments-list’); if (!list) return;
-if (!currentComments.length) { list.innerHTML = ‘<div style="color:var(--muted);font-size:0.78rem;font-style:italic;padding:6px 0">No comments yet.</div>’; return; }
-list.innerHTML = currentComments.map(c => {
-const escaped = escapeHtml(c.text).replace(/@(\w+(\s\w.)?)/g, ‘<span class="mention">@$1</span>’);
-return `<div class="comment"> <div class="comment-meta">${c.author} · ${new Date(c.at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</div> <div class="comment-text">${escaped}</div> </div>`;
-}).join(’’);
-list.scrollTop = list.scrollHeight;
+  const list = document.getElementById('comments-list'); if (!list) return;
+  if (!currentComments.length) { list.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;font-style:italic;padding:6px 0">No comments yet.</div>'; return; }
+  list.innerHTML = currentComments.map(c => {
+    const escaped = escapeHtml(c.text).replace(/@(\w+(\s\w\.)?)/g, '<span class="mention">@$1</span>');
+    return `
+      <div class="comment">
+        <div class="comment-meta">${c.author} · ${new Date(c.at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</div>
+        <div class="comment-text">${escaped}</div>
+      </div>
+    `;
+  }).join('');
+  list.scrollTop = list.scrollHeight;
 }
 function renderActivity() {
-const list = document.getElementById(‘activity-list’); if (!list) return;
-if (!currentActivity.length) { list.innerHTML = ‘<div style="color:var(--muted);font-size:0.78rem;font-style:italic;padding:6px 0">No activity yet.</div>’; return; }
-list.innerHTML = […currentActivity].reverse().map(a => `<div class="activity-item"> <span class="activity-time">${timeAgo(a.at)}</span> <span class="activity-text"><strong>${a.user}</strong> ${a.text}</span> </div>`).join(’’);
+  const list = document.getElementById('activity-list'); if (!list) return;
+  if (!currentActivity.length) { list.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;font-style:italic;padding:6px 0">No activity yet.</div>'; return; }
+  list.innerHTML = [...currentActivity].reverse().map(a => `
+    <div class="activity-item">
+      <span class="activity-time">${timeAgo(a.at)}</span>
+      <span class="activity-text"><strong>${a.user}</strong> ${a.text}</span>
+    </div>
+  `).join('');
 }
-function escapeHtml(s) { return s.replace(/[&<>”’]/g, c => ({’&’:’&’,’<’:’<’,’>’:’>’,’”’:’"’,”’”:’'’}[c])); }
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-function closeModal() { document.getElementById(‘modal-overlay’).classList.remove(‘open’); editingId = null; currentPhotos = []; currentComments = []; currentActivity = []; }
-function closeModalOutside(e) { if (e.target === document.getElementById(‘modal-overlay’)) closeModal(); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; currentPhotos = []; currentComments = []; currentActivity = []; }
+function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
 function logActivity(text) { currentActivity.push({ at: new Date().toISOString(), user: currentUser, text }); }
 
 function saveOrder() {
-const g = id => document.getElementById(id)?.value?.trim() || ‘’;
-const list = activeTab === ‘backorders’ ? backOrders : serviceOrders;
-const oldOrder = editingId ? list.find(o => o.id === editingId) : null;
-const wasCompleted = oldOrder?.status === ‘Completed’;
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const list = activeTab === 'backorders' ? backOrders : serviceOrders;
+  const oldOrder = editingId ? list.find(o => o.id === editingId) : null;
+  const wasCompleted = oldOrder?.status === 'Completed';
 
-if (activeTab === ‘backorders’) {
-const obj = { id:g(‘f-id’), jobCode:g(‘f-jobCode’), workOrder:g(‘f-workOrder’), projectName:g(‘f-projectName’), floor:g(‘f-floor’), windowDoorNum:g(‘f-windowDoorNum’), product:g(‘f-product’), dueDate:g(‘f-dueDate’), priority:g(‘f-priority’), status:g(‘f-status’), assignee:g(‘f-assignee’), reason:g(‘f-reason’), photos: currentPhotos, comments: currentComments, activity: currentActivity };
-if (!obj.projectName || !obj.dueDate) { alert(‘Please fill Project Name and Due Date.’); return; }
-if (obj.status === ‘Completed’ && !wasCompleted) { obj.completedAt = new Date().toISOString(); obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: ‘marked as completed ✓’ }); }
-if (oldOrder) {
-// Diff & log changes
-[‘priority’,‘status’,‘assignee’,‘dueDate’].forEach(k => { if (oldOrder[k] !== obj[k]) obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: `changed ${k} from "${oldOrder[k]||'—'}" to "${obj[k]||'—'}"` }); });
-obj.createdAt = oldOrder.createdAt;
-if (wasCompleted) obj.completedAt = oldOrder.completedAt;
-const i = backOrders.findIndex(o => o.id === editingId); if (i>=0) backOrders[i] = obj;
-} else {
-obj.createdAt = new Date().toISOString().slice(0,10);
-obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: ‘created this order’ });
-backOrders.unshift(obj);
-}
-// Notify assignee on new assignment
-if (obj.assignee && obj.assignee !== currentUser && (!oldOrder || oldOrder.assignee !== obj.assignee)) {
-notifications.unshift({ id: Date.now()+Math.random(), title: `📌 New assignment from ${currentUser}`, msg: `${obj.id} — ${obj.projectName}`, type: ‘success’, at: new Date().toISOString(), read: false, user: obj.assignee });
-}
-} else {
-const obj = { id:g(‘f-id’), jobCode:g(‘f-jobCode’), client:g(‘f-client’), issueType:g(‘f-issueType’), technician:g(‘f-technician’), dueDate:g(‘f-dueDate’), priority:g(‘f-priority’), status:g(‘f-status’), assignee:g(‘f-assignee’), notes:g(‘f-notes’), photos: currentPhotos, comments: currentComments, activity: currentActivity };
-if (!obj.client || !obj.dueDate) { alert(‘Please fill Client Name and Due Date.’); return; }
-if (obj.status === ‘Completed’ && !wasCompleted) { obj.completedAt = new Date().toISOString(); obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: ‘marked as completed ✓’ }); }
-if (oldOrder) {
-[‘priority’,‘status’,‘assignee’,‘dueDate’].forEach(k => { if (oldOrder[k] !== obj[k]) obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: `changed ${k} from "${oldOrder[k]||'—'}" to "${obj[k]||'—'}"` }); });
-obj.createdAt = oldOrder.createdAt;
-if (wasCompleted) obj.completedAt = oldOrder.completedAt;
-const i = serviceOrders.findIndex(o => o.id === editingId); if (i>=0) serviceOrders[i] = obj;
-} else {
-obj.createdAt = new Date().toISOString().slice(0,10);
-obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: ‘created this order’ });
-serviceOrders.unshift(obj);
-}
-if (obj.assignee && obj.assignee !== currentUser && (!oldOrder || oldOrder.assignee !== obj.assignee)) {
-notifications.unshift({ id: Date.now()+Math.random(), title: `📌 New assignment from ${currentUser}`, msg: `${obj.id} — ${obj.client}`, type: ‘success’, at: new Date().toISOString(), read: false, user: obj.assignee });
-}
-}
-closeModal(); saveData(); renderAll();
-pushNotification(‘✓ Saved’, ‘Order saved successfully.’, ‘success’);
+  if (activeTab === 'backorders') {
+    const obj = { id:g('f-id'), jobCode:g('f-jobCode'), workOrder:g('f-workOrder'), projectName:g('f-projectName'), floor:g('f-floor'), windowDoorNum:g('f-windowDoorNum'), product:g('f-product'), dueDate:g('f-dueDate'), priority:g('f-priority'), status:g('f-status'), assignee:g('f-assignee'), reason:g('f-reason'), photos: currentPhotos, comments: currentComments, activity: currentActivity };
+    if (!obj.projectName || !obj.dueDate) { alert('Please fill Project Name and Due Date.'); return; }
+    if (obj.status === 'Completed' && !wasCompleted) { obj.completedAt = new Date().toISOString(); obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'marked as completed ✓' }); }
+    if (oldOrder) {
+      // Diff & log changes
+      ['priority','status','assignee','dueDate'].forEach(k => { if (oldOrder[k] !== obj[k]) obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: `changed ${k} from "${oldOrder[k]||'—'}" to "${obj[k]||'—'}"` }); });
+      obj.createdAt = oldOrder.createdAt;
+      if (wasCompleted) obj.completedAt = oldOrder.completedAt;
+      const i = backOrders.findIndex(o => o.id === editingId); if (i>=0) backOrders[i] = obj;
+    } else {
+      obj.createdAt = new Date().toISOString().slice(0,10);
+      obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'created this order' });
+      backOrders.unshift(obj);
+    }
+    // Notify assignee on new assignment
+    if (obj.assignee && obj.assignee !== currentUser && (!oldOrder || oldOrder.assignee !== obj.assignee)) {
+      notifications.unshift({ id: Date.now()+Math.random(), title: `📌 New assignment from ${currentUser}`, msg: `${obj.id} — ${obj.projectName}`, type: 'success', at: new Date().toISOString(), read: false, user: obj.assignee });
+    }
+  } else {
+    const obj = { id:g('f-id'), jobCode:g('f-jobCode'), client:g('f-client'), issueType:g('f-issueType'), technician:g('f-technician'), dueDate:g('f-dueDate'), priority:g('f-priority'), status:g('f-status'), assignee:g('f-assignee'), notes:g('f-notes'), photos: currentPhotos, comments: currentComments, activity: currentActivity };
+    if (!obj.client || !obj.dueDate) { alert('Please fill Client Name and Due Date.'); return; }
+    if (obj.status === 'Completed' && !wasCompleted) { obj.completedAt = new Date().toISOString(); obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'marked as completed ✓' }); }
+    if (oldOrder) {
+      ['priority','status','assignee','dueDate'].forEach(k => { if (oldOrder[k] !== obj[k]) obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: `changed ${k} from "${oldOrder[k]||'—'}" to "${obj[k]||'—'}"` }); });
+      obj.createdAt = oldOrder.createdAt;
+      if (wasCompleted) obj.completedAt = oldOrder.completedAt;
+      const i = serviceOrders.findIndex(o => o.id === editingId); if (i>=0) serviceOrders[i] = obj;
+    } else {
+      obj.createdAt = new Date().toISOString().slice(0,10);
+      obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'created this order' });
+      serviceOrders.unshift(obj);
+    }
+    if (obj.assignee && obj.assignee !== currentUser && (!oldOrder || oldOrder.assignee !== obj.assignee)) {
+      notifications.unshift({ id: Date.now()+Math.random(), title: `📌 New assignment from ${currentUser}`, msg: `${obj.id} — ${obj.client}`, type: 'success', at: new Date().toISOString(), read: false, user: obj.assignee });
+    }
+  }
+  closeModal(); saveData(); renderAll();
+  pushNotification('✓ Saved', 'Order saved successfully.', 'success');
 }
 
 function editOrder(id) {
-const o = activeTab===‘backorders’ ? backOrders.find(x=>x.id===id) : serviceOrders.find(x=>x.id===id);
-if (o) openModal(o);
+  const o = activeTab==='backorders' ? backOrders.find(x=>x.id===id) : serviceOrders.find(x=>x.id===id);
+  if (o) openModal(o);
 }
 function markComplete(id) {
-const list = activeTab===‘backorders’ ? backOrders : serviceOrders;
-const o = list.find(x=>x.id===id);
-if (o) {
-o.status = ‘Completed’;
-o.completedAt = new Date().toISOString();
-if (!o.activity) o.activity = [];
-o.activity.push({ at: new Date().toISOString(), user: currentUser, text: ‘marked as completed ✓’ });
-saveData(); renderAll();
-pushNotification(‘✓ Done’, `${id} completed!`, ‘success’);
-}
+  const list = activeTab==='backorders' ? backOrders : serviceOrders;
+  const o = list.find(x=>x.id===id);
+  if (o) {
+    o.status = 'Completed';
+    o.completedAt = new Date().toISOString();
+    if (!o.activity) o.activity = [];
+    o.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'marked as completed ✓' });
+    saveData(); renderAll();
+    pushNotification('✓ Done', `${id} completed!`, 'success');
+  }
 }
 function deleteOrder(id) {
-if (!confirm(`Delete ${id}?`)) return;
-if (activeTab===‘backorders’) backOrders = backOrders.filter(o=>o.id!==id);
-else serviceOrders = serviceOrders.filter(o=>o.id!==id);
-saveData(); renderAll();
+  if (!confirm(`Delete ${id}?`)) return;
+  if (activeTab==='backorders') backOrders = backOrders.filter(o=>o.id!==id);
+  else serviceOrders = serviceOrders.filter(o=>o.id!==id);
+  saveData(); renderAll();
 }
 
 // ─── EMAIL ORDER ────────────────────────────────────────
 function emailOrder() {
-const g = id => document.getElementById(id)?.value?.trim() || ‘’;
-const id = g(‘f-id’);
-const isBack = activeTab === ‘backorders’;
-const subject = isBack
-? `Back Order Update: ${id} - ${g('f-projectName')}`
-: `Service Order Update: ${id} - ${g('f-client')}`;
-let body = `Hi,\n\nUpdate on ${isBack?'back':'service'} order ${id}:\n\n`;
-if (isBack) {
-body += `Job Code: ${g('f-jobCode')}\nWork Order: ${g('f-workOrder')}\nProject: ${g('f-projectName')}\nFloor: ${g('f-floor')}\nWindow/Door: ${g('f-windowDoorNum')}\nProduct: ${g('f-product')}\nDue Date: ${g('f-dueDate')}\nPriority: ${g('f-priority')}\nStatus: ${g('f-status')}\nAssigned To: ${g('f-assignee')}\nReason: ${g('f-reason')}`;
-} else {
-body += `Job Code: ${g('f-jobCode')}\nClient: ${g('f-client')}\nIssue: ${g('f-issueType')}\nTechnician: ${g('f-technician')}\nDue Date: ${g('f-dueDate')}\nPriority: ${g('f-priority')}\nStatus: ${g('f-status')}\nAssigned To: ${g('f-assignee')}\nNotes: ${g('f-notes')}`;
-}
-if (currentComments.length) {
-body += `\n\nRecent comments:\n` + currentComments.slice(-3).map(c => `- ${c.author}: ${c.text}`).join(’\n’);
-}
-body += `\n\nSent from BVGlazing Order Tracker by ${currentUser}.`;
-window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const id = g('f-id');
+  const isBack = activeTab === 'backorders';
+  const subject = isBack
+    ? `Back Order Update: ${id} - ${g('f-projectName')}`
+    : `Service Order Update: ${id} - ${g('f-client')}`;
+  let body = `Hi,\n\nUpdate on ${isBack?'back':'service'} order ${id}:\n\n`;
+  if (isBack) {
+    body += `Job Code: ${g('f-jobCode')}\nWork Order: ${g('f-workOrder')}\nProject: ${g('f-projectName')}\nFloor: ${g('f-floor')}\nWindow/Door: ${g('f-windowDoorNum')}\nProduct: ${g('f-product')}\nDue Date: ${g('f-dueDate')}\nPriority: ${g('f-priority')}\nStatus: ${g('f-status')}\nAssigned To: ${g('f-assignee')}\nReason: ${g('f-reason')}`;
+  } else {
+    body += `Job Code: ${g('f-jobCode')}\nClient: ${g('f-client')}\nIssue: ${g('f-issueType')}\nTechnician: ${g('f-technician')}\nDue Date: ${g('f-dueDate')}\nPriority: ${g('f-priority')}\nStatus: ${g('f-status')}\nAssigned To: ${g('f-assignee')}\nNotes: ${g('f-notes')}`;
+  }
+  if (currentComments.length) {
+    body += `\n\nRecent comments:\n` + currentComments.slice(-3).map(c => `- ${c.author}: ${c.text}`).join('\n');
+  }
+  body += `\n\nSent from BVGlazing Order Tracker by ${currentUser}.`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 // ─── WEEKLY REPORT ──────────────────────────────────────
 function openWeeklyReport() {
-const today = new Date(); today.setHours(0,0,0,0);
-const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
-const all = […backOrders, …serviceOrders];
-const completedThisWeek = all.filter(o => o.completedAt && new Date(o.completedAt) >= weekAgo);
-const stillOverdue = all.filter(o => o.status !== ‘Completed’ && new Date(o.dueDate) < today);
-const newThisWeek = all.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
-const stillUrgent = all.filter(o => o.status !== ‘Completed’ && o.priority === ‘Urgent’);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const all = [...backOrders, ...serviceOrders];
+  const completedThisWeek = all.filter(o => o.completedAt && new Date(o.completedAt) >= weekAgo);
+  const stillOverdue = all.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today);
+  const newThisWeek = all.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
+  const stillUrgent = all.filter(o => o.status !== 'Completed' && o.priority === 'Urgent');
 
-// Recurring problems this week
-const counts = {};
-all.forEach(o => { const k = o.projectName || o.client; if(!k)return; counts[k] = (counts[k]||0) + 1; });
-const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  // Recurring problems this week
+  const counts = {};
+  all.forEach(o => { const k = o.projectName || o.client; if(!k)return; counts[k] = (counts[k]||0) + 1; });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,3);
 
-// Per-person stats
-const byPerson = {};
-TEAM.forEach(t => byPerson[t] = { done:0, open:0 });
-all.forEach(o => {
-if (!o.assignee) return;
-if (!byPerson[o.assignee]) byPerson[o.assignee] = { done:0, open:0 };
-if (o.completedAt && new Date(o.completedAt) >= weekAgo) byPerson[o.assignee].done++;
-if (o.status !== ‘Completed’) byPerson[o.assignee].open++;
-});
+  // Per-person stats
+  const byPerson = {};
+  TEAM.forEach(t => byPerson[t] = { done:0, open:0 });
+  all.forEach(o => {
+    if (!o.assignee) return;
+    if (!byPerson[o.assignee]) byPerson[o.assignee] = { done:0, open:0 };
+    if (o.completedAt && new Date(o.completedAt) >= weekAgo) byPerson[o.assignee].done++;
+    if (o.status !== 'Completed') byPerson[o.assignee].open++;
+  });
 
-const reportHtml = `<div class="report-section"> <div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace">${weekAgo.toLocaleDateString('en-CA')} → ${today.toLocaleDateString('en-CA')}</div> <div style="font-size:0.95rem;color:var(--ink);line-height:1.6"> This week: <strong>${completedThisWeek.length} orders closed</strong>, ${newThisWeek.length} new orders created. ${stillOverdue.length} still overdue, ${stillUrgent.length} urgent open. </div> </div> <div class="report-section"> <h3>✅ Completed (${completedThisWeek.length})</h3> <ul>${completedThisWeek.length ? completedThisWeek.map(o =>`<li>• ${o.id} — ${o.projectName||o.client} (${o.assignee||‘Unassigned’})</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None this week</li>'}</ul> </div> <div class="report-section"> <h3>⚠️ Still Overdue (${stillOverdue.length})</h3> <ul>${stillOverdue.length ? stillOverdue.map(o => `<li>• ${o.id} — ${o.projectName||o.client} (${o.assignee||‘Unassigned’}) — due ${fmt(o.dueDate)}</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None — great work!</li>'}</ul> </div> <div class="report-section"> <h3>🔥 Top Recurring Issues</h3> <ul>${top.length ? top.map(([n,c]) => `<li>• ${n} — ${c} order${c>1?‘s’:’’}</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None</li>'}</ul> </div> <div class="report-section"> <h3>👥 Team Performance</h3> <ul>${TEAM.filter(t => byPerson[t].done > 0 || byPerson[t].open > 0).map(t => `<li>• ${t}: ${byPerson[t].done} done · ${byPerson[t].open} open</li>`).join('')}</ul> </div> `;
-document.getElementById(‘report-body’).innerHTML = reportHtml;
-document.getElementById(‘report-modal’).classList.add(‘open’);
+  const reportHtml = `
+    <div class="report-section">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace">${weekAgo.toLocaleDateString('en-CA')} → ${today.toLocaleDateString('en-CA')}</div>
+      <div style="font-size:0.95rem;color:var(--ink);line-height:1.6">
+        This week: <strong>${completedThisWeek.length} orders closed</strong>, ${newThisWeek.length} new orders created. ${stillOverdue.length} still overdue, ${stillUrgent.length} urgent open.
+      </div>
+    </div>
+    <div class="report-section">
+      <h3>✅ Completed (${completedThisWeek.length})</h3>
+      <ul>${completedThisWeek.length ? completedThisWeek.map(o => `<li>• ${o.id} — ${o.projectName||o.client} (${o.assignee||'Unassigned'})</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None this week</li>'}</ul>
+    </div>
+    <div class="report-section">
+      <h3>⚠️ Still Overdue (${stillOverdue.length})</h3>
+      <ul>${stillOverdue.length ? stillOverdue.map(o => `<li>• ${o.id} — ${o.projectName||o.client} (${o.assignee||'Unassigned'}) — due ${fmt(o.dueDate)}</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None — great work!</li>'}</ul>
+    </div>
+    <div class="report-section">
+      <h3>🔥 Top Recurring Issues</h3>
+      <ul>${top.length ? top.map(([n,c]) => `<li>• ${n} — ${c} order${c>1?'s':''}</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None</li>'}</ul>
+    </div>
+    <div class="report-section">
+      <h3>👥 Team Performance</h3>
+      <ul>${TEAM.filter(t => byPerson[t].done > 0 || byPerson[t].open > 0).map(t => `<li>• ${t}: ${byPerson[t].done} done · ${byPerson[t].open} open</li>`).join('')}</ul>
+    </div>
+  `;
+  document.getElementById('report-body').innerHTML = reportHtml;
+  document.getElementById('report-modal').classList.add('open');
 }
-function closeReportModal() { document.getElementById(‘report-modal’).classList.remove(‘open’); }
+function closeReportModal() { document.getElementById('report-modal').classList.remove('open'); }
 
 function emailWeeklyReport() {
-const today = new Date(); today.setHours(0,0,0,0);
-const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
-const all = […backOrders, …serviceOrders];
-const completed = all.filter(o => o.completedAt && new Date(o.completedAt) >= weekAgo);
-const overdue = all.filter(o => o.status !== ‘Completed’ && new Date(o.dueDate) < today);
-const newOrders = all.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const all = [...backOrders, ...serviceOrders];
+  const completed = all.filter(o => o.completedAt && new Date(o.completedAt) >= weekAgo);
+  const overdue = all.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today);
+  const newOrders = all.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
 
-const subject = `Weekly Order Report — ${today.toLocaleDateString('en-CA')}`;
-let body = `Hi Firas,\n\nWeekly summary from the Order Tracker (${weekAgo.toLocaleDateString('en-CA')} → ${today.toLocaleDateString('en-CA')}):\n\n`;
-body += `- Orders completed: ${completed.length}\n- New orders: ${newOrders.length}\n- Still overdue: ${overdue.length}\n\n`;
-if (completed.length) body += `Completed:\n${completed.map(o => `  • ${o.id} - ${o.projectName||o.client}`).join('\n')}\n\n`;
-if (overdue.length) body += `Still Overdue:\n${overdue.map(o => `  • ${o.id} - ${o.projectName||o.client} (due ${fmt(o.dueDate)})`).join('\n')}\n\n`;
-body += `Regards,\n${currentUser}\nBVGlazing Systems — 131 Caldari Road, Concord, ON`;
-window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const subject = `Weekly Order Report — ${today.toLocaleDateString('en-CA')}`;
+  let body = `Hi Firas,\n\nWeekly summary from the Order Tracker (${weekAgo.toLocaleDateString('en-CA')} → ${today.toLocaleDateString('en-CA')}):\n\n`;
+  body += `- Orders completed: ${completed.length}\n- New orders: ${newOrders.length}\n- Still overdue: ${overdue.length}\n\n`;
+  if (completed.length) body += `Completed:\n${completed.map(o => `  • ${o.id} - ${o.projectName||o.client}`).join('\n')}\n\n`;
+  if (overdue.length) body += `Still Overdue:\n${overdue.map(o => `  • ${o.id} - ${o.projectName||o.client} (due ${fmt(o.dueDate)})`).join('\n')}\n\n`;
+  body += `Regards,\n${currentUser}\nBVGlazing Systems — 131 Caldari Road, Concord, ON`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 // ─── SYNC (Export/Import) ───────────────────────────────
-function openSyncModal() { document.getElementById(‘sync-modal’).classList.add(‘open’); }
-function closeSyncModal() { document.getElementById(‘sync-modal’).classList.remove(‘open’); }
+function openSyncModal() { document.getElementById('sync-modal').classList.add('open'); }
+function closeSyncModal() { document.getElementById('sync-modal').classList.remove('open'); }
 function exportBackup() {
-const data = { backOrders, serviceOrders, notifications, exportedAt: new Date().toISOString(), exportedBy: currentUser };
-const blob = new Blob([JSON.stringify(data, null, 2)], { type: ‘application/json’ });
-const a = document.createElement(‘a’);
-a.href = URL.createObjectURL(blob);
-a.download = `bvg-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
-a.click();
-pushNotification(‘⬇ Backup Saved’, ‘Save to a shared cloud folder so the team can sync.’, ‘success’);
+  const data = { backOrders, serviceOrders, notifications, exportedAt: new Date().toISOString(), exportedBy: currentUser };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bvg-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  pushNotification('⬇ Backup Saved', 'Save to a shared cloud folder so the team can sync.', 'success');
 }
 function importData(e) {
-const file = e.target.files[0]; if (!file) return;
-if (!confirm(‘This will replace all current data. Continue?’)) return;
-const reader = new FileReader();
-reader.onload = (evt) => {
-try {
-const data = JSON.parse(evt.target.result);
-if (data.backOrders) backOrders = data.backOrders;
-if (data.serviceOrders) serviceOrders = data.serviceOrders;
-if (data.notifications) notifications = data.notifications;
-saveData(); renderAll(); closeSyncModal();
-pushNotification(‘⬆ Imported’, `Data imported (exported by ${data.exportedBy || 'unknown'})`, ‘success’);
-} catch (err) { alert(’Invalid backup file: ’ + err.message); }
-};
-reader.readAsText(file);
+  const file = e.target.files[0]; if (!file) return;
+  if (!confirm('This will replace all current data. Continue?')) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data.backOrders) backOrders = data.backOrders;
+      if (data.serviceOrders) serviceOrders = data.serviceOrders;
+      if (data.notifications) notifications = data.notifications;
+      saveData(); renderAll(); closeSyncModal();
+      pushNotification('⬆ Imported', `Data imported (exported by ${data.exportedBy || 'unknown'})`, 'success');
+    } catch (err) { alert('Invalid backup file: ' + err.message); }
+  };
+  reader.readAsText(file);
 }
 
 // ─── EXPORT CSV ─────────────────────────────────────────
 function exportCSV() {
-const orders = activeTab===‘backorders’ ? backOrders : serviceOrders;
-if (!orders.length) return;
-const exportable = orders.map(({photos, comments, activity, …rest}) => ({…rest, photoCount:(photos||[]).length, commentCount:(comments||[]).length}));
-const keys = Object.keys(exportable[0]);
-const csv = [keys.join(’,’), …exportable.map(o => keys.map(k=>`"${(o[k]||'').toString().replace(/"/g,'""')}"`).join(’,’))].join(’\n’);
-const a = document.createElement(‘a’);
-a.href = ‘data:text/csv;charset=utf-8,’ + encodeURIComponent(csv);
-a.download = `${activeTab}-${new Date().toISOString().slice(0,10)}.csv`;
-a.click();
+  const orders = activeTab==='backorders' ? backOrders : serviceOrders;
+  if (!orders.length) return;
+  const exportable = orders.map(({photos, comments, activity, ...rest}) => ({...rest, photoCount:(photos||[]).length, commentCount:(comments||[]).length}));
+  const keys = Object.keys(exportable[0]);
+  const csv = [keys.join(','), ...exportable.map(o => keys.map(k=>`"${(o[k]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `${activeTab}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
-function fmt(d) { if (!d) return ‘—’; const [y,m,day] = d.split(’-’); return `${day}/${m}/${y}`; }
+function fmt(d) { if (!d) return '—'; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
 function emptyRow(cols) { return `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:32px;font-style:italic">No orders match.</td></tr>`; }
-function genId(prefix) { const list = prefix===‘BO’ ? backOrders : serviceOrders; const nums = list.map(o => parseInt(o.id.split(’-’)[1])).filter(n => !isNaN(n)); return prefix + ‘-’ + (Math.max(…nums, 1000) + 1); }
+function genId(prefix) { const list = prefix==='BO' ? backOrders : serviceOrders; const nums = list.map(o => parseInt(o.id.split('-')[1])).filter(n => !isNaN(n)); return prefix + '-' + (Math.max(...nums, 1000) + 1); }
 function datesEqual(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
 
 function renderAll() {
-renderDailySummary();
-renderQuickFilters();
-renderKPIs();
-renderTable();
-renderWeeklyChart();
-renderRecurringProblems();
-renderNotifBadge();
+  renderDailySummary();
+  renderQuickFilters();
+  renderKPIs();
+  renderTable();
+  renderWeeklyChart();
+  renderRecurringProblems();
+  renderNotifBadge();
 }
 
 // ─── INIT ────────────────────────────────────────────────
 loadUser();
 if (!loadData()) {
-backOrders = JSON.parse(JSON.stringify(DEFAULT_BO));
-serviceOrders = JSON.parse(JSON.stringify(DEFAULT_SO));
-saveData();
+  backOrders = [];
+  serviceOrders = [];
 }
 setInterval(updateClock, 1000); updateClock();
 setInterval(checkOverdueAndReminders, 60000);
+// Auto-refresh from cloud every 30 seconds
+setInterval(async () => { if(document.visibilityState==='visible') { await cloudLoad(); renderAll(); } }, 30000);
 renderAll();
-setTimeout(() => { checkOverdueAndReminders(); }, 1000);
+
+// Initial cloud load
+(async () => {
+  const ok = await cloudLoad();
+  if (!ok && backOrders.length === 0 && serviceOrders.length === 0) {
+    backOrders = JSON.parse(JSON.stringify(DEFAULT_BO));
+    serviceOrders = JSON.parse(JSON.stringify(DEFAULT_SO));
+    saveData();
+  }
+  renderAll();
+  setTimeout(() => { checkOverdueAndReminders(); }, 1000);
+})();
 
 // Close notif dropdown on outside click
-document.addEventListener(‘click’, (e) => {
-const dd = document.getElementById(‘notif-dropdown’);
-const bell = document.querySelector(’.notif-bell’);
-if (dd.classList.contains(‘open’) && !dd.contains(e.target) && !bell.contains(e.target)) dd.classList.remove(‘open’);
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('notif-dropdown');
+  const bell = document.querySelector('.notif-bell');
+  if (dd.classList.contains('open') && !dd.contains(e.target) && !bell.contains(e.target)) dd.classList.remove('open');
 });
 </script>
-
 </body>
 </html>
