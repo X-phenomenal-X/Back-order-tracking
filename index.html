@@ -507,20 +507,28 @@ async function cloudLoad() {
           // Keep local fields if order existed
           photos: [], comments: [], activity: [], createdAt: ''
         };
-        // Try to preserve local-only fields by matching id
+        // Parse JSON-encoded fields from cloud
+        const parseCloudArr = (v, fallback) => {
+          if (Array.isArray(v)) return v;
+          if (typeof v === 'string' && v) { try { return JSON.parse(v); } catch(e) {} }
+          return fallback || [];
+        };
+        const cloudPhotos   = parseCloudArr(o.photos,   []);
+        const cloudComments = parseCloudArr(o.comments, []);
+        const cloudActivity = parseCloudArr(o.activity, []);
+
+        // Merge: prefer cloud data; fall back to local if cloud is empty
         const existingBO = backOrders.find(x => x.id === reconstructed.id);
         const existingSO = serviceOrders.find(x => x.id === reconstructed.id);
         const existing = existingBO || existingSO;
-        if (existing) {
-          reconstructed.photos = existing.photos || [];
-          reconstructed.comments = existing.comments || [];
-          reconstructed.activity = existing.activity || [];
-          reconstructed.createdAt = existing.createdAt || '';
-          reconstructed.completedAt = existing.completedAt;
-          if (!reconstructed.completedAt && reconstructed.status === 'Completed') reconstructed.completedAt = new Date().toISOString();
-        } else if (reconstructed.status === 'Completed') {
-          reconstructed.completedAt = new Date().toISOString();
-        }
+
+        // Photos: use cloud photos if available, otherwise keep local
+        reconstructed.photos   = cloudPhotos.length   ? cloudPhotos   : (existing ? existing.photos   || [] : []);
+        reconstructed.comments = cloudComments.length ? cloudComments : (existing ? existing.comments || [] : []);
+        reconstructed.activity = cloudActivity.length ? cloudActivity : (existing ? existing.activity || [] : []);
+        reconstructed.createdAt   = o.createdAt   || (existing ? existing.createdAt   : '') || new Date().toISOString().slice(0,10);
+        reconstructed.completedAt = o.completedAt || (existing ? existing.completedAt : '') || '';
+        if (!reconstructed.completedAt && reconstructed.status === 'Completed') reconstructed.completedAt = new Date().toISOString();
         if (!reconstructed.createdAt) reconstructed.createdAt = new Date().toISOString().slice(0,10);
         
         if (o.type === 'service' || (reconstructed.id && reconstructed.id.startsWith('SO'))) {
@@ -586,7 +594,12 @@ function flattenOrder(o) {
     priority: o.priority || '',
     status: o.status || '',
     assignee: o.assignee || o.technician || '',
-    reason: o.reason || o.notes || ''
+    reason: o.reason || o.notes || '',
+    createdAt: o.createdAt || '',
+    completedAt: o.completedAt || '',
+    photos: JSON.stringify(o.photos || []),
+    comments: JSON.stringify(o.comments || []),
+    activity: JSON.stringify(o.activity || [])
   };
 }
 function formatDateFromSheet(d) {
@@ -1086,14 +1099,36 @@ function activitySection() {
     </div>
   `;
 }
-function handlePhotoUpload(e) {
-  const files = Array.from(e.target.files);
-  files.forEach(file => {
-    if (currentPhotos.length >= 6) { alert('Max 6 photos.'); return; }
+function compressPhoto(file) {
+  return new Promise(resolve => {
     const reader = new FileReader();
-    reader.onload = (evt) => { currentPhotos.push({ data: evt.target.result, name: file.name }); renderPhotos(); };
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 800;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve({ data: canvas.toDataURL('image/jpeg', 0.65), name: file.name });
+      };
+      img.src = e.target.result;
+    };
     reader.readAsDataURL(file);
   });
+}
+async function handlePhotoUpload(e) {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    if (currentPhotos.length >= 6) { alert('Max 6 photos.'); break; }
+    const compressed = await compressPhoto(file);
+    currentPhotos.push(compressed);
+    renderPhotos();
+  }
 }
 function renderPhotos() {
   const g = document.getElementById('photo-grid'); if (!g) return;
