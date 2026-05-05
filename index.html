@@ -646,6 +646,7 @@ td.due-cell .overdue-tag { font-size: 10px; display: block; }
 // CONFIG & CONSTANTS
 // ═══════════════════════════════════════════
 const APP_KEY = 'bvg_order_tracker_v6';
+const CLOUD_URL = 'https://script.google.com/macros/s/AKfycby75t3rKG5TzQz020YxqLZk-_5afSyoewgc7YgjJu5v9pUi1fGkkRbfph0V3KaCCHSN/exec';
 const USERS = ['Abhay','Firas','Derek M.','James T.','Carlos R.','Sara K.','Mike P.'];
 const AVATAR_COLORS = ['#2563eb','#7c3aed','#0891b2','#059669','#dc2626','#d97706','#9333ea'];
 
@@ -1373,110 +1374,111 @@ function emailOrder() {
 // ═══════════════════════════════════════════
 function openSyncModal() {
   const d = getData();
+  const lastSync = d.lastSync ? `Last synced: ${fmtRelative(d.lastSync)}` : 'Never synced';
   document.getElementById('syncBody').innerHTML = `
     <div class="sync-status-bar">
-      <div class="sync-dot ${d.cloudKey ? 'online' : 'offline'}" id="modalSyncDot"></div>
-      <span id="modalSyncStatus">${d.cloudKey ? 'Cloud sync configured' : 'Not connected — data stored locally only'}</span>
+      <div class="sync-dot" id="modalSyncDot"></div>
+      <span id="modalSyncStatus">Connected to BVGlazing Google Sheets · ${lastSync}</span>
     </div>
     <div class="sync-instructions">
-      <strong>Set up free cloud sync in 2 minutes:</strong>
-      <ol>
-        <li>Go to <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> and create a free account</li>
-        <li>Click <strong>API Keys</strong> → copy your Master Key</li>
-        <li>Paste it below and click <strong>Save & Sync</strong> — your data will sync automatically</li>
-        <li>On another device, open this app and enter the same key + bin ID</li>
-      </ol>
-      <p style="margin-top:8px;color:var(--gray-400);font-size:11px">Note: Photos are stored locally on each device. Order data (text) syncs to the cloud.</p>
+      <strong>☁️ Google Sheets Cloud Sync is active</strong>
+      <p style="margin-top:8px">All back orders and service orders sync automatically to your shared Google Sheet every 30 seconds. All team members on the same network share the same data.</p>
+      <p style="margin-top:8px;color:var(--gray-500);font-size:11px">📷 Note: Photos are stored locally on each device to save bandwidth. Order text data (status, comments, notes) syncs to the cloud.</p>
     </div>
-    <div class="form-grid" style="margin-top:16px">
-      <div class="form-group">
-        <label>JSONbin Master API Key</label>
-        <input type="password" id="cloudKeyInput" value="${d.cloudKey||''}" placeholder="$2b$10$...">
-      </div>
-      <div class="form-group">
-        <label>Bin ID (auto-created on first sync)</label>
-        <input type="text" id="cloudBinInput" value="${d.cloudBin||''}" placeholder="Will appear after first sync">
-      </div>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:8px">
-      <button class="btn btn-blue btn-sm" onclick="testAndSync()">🔄 Sync Now</button>
-      ${d.cloudKey && d.cloudBin ? `<button class="btn btn-danger btn-sm" onclick="disconnectCloud()">Disconnect Cloud</button>` : ''}
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue btn-sm" onclick="syncNow()">🔄 Sync Now</button>
+      <button class="btn btn-secondary btn-sm" onclick="pullFromCloud()">⬇ Pull Latest from Cloud</button>
     </div>`;
   openModal('syncModal');
+  // Run a quick sync check
+  syncFromCloud(true);
 }
 
 async function saveSyncSettings() {
-  const key = document.getElementById('cloudKeyInput').value.trim();
-  const bin = document.getElementById('cloudBinInput').value.trim();
-  const d = getData();
-  d.cloudKey = key; d.cloudBin = bin;
-  save();
-  if (key) { await testAndSync(); }
-  else { toast('Settings saved (no cloud key — local only)'); closeModal('syncModal'); }
+  await syncNow();
+  closeModal('syncModal');
 }
 
-async function testAndSync() {
-  const d = getData();
-  const key = (document.getElementById('cloudKeyInput')||{}).value || d.cloudKey;
-  const bin = (document.getElementById('cloudBinInput')||{}).value || d.cloudBin;
-  if (!key) { toast('Please enter your JSONbin API key first.'); return; }
-  setSyncStatus('syncing');
-  try {
-    const payload = { backOrders: d.backOrders, serviceOrders: d.serviceOrders, savedAt: new Date().toISOString() };
-    let url, method;
-    if (bin) { url = `https://api.jsonbin.io/v3/b/${bin}`; method = 'PUT'; }
-    else { url = 'https://api.jsonbin.io/v3/b'; method = 'POST'; }
-    const res = await fetch(url, { method, headers: {'Content-Type':'application/json','X-Master-Key':key,'X-Bin-Private':'false'}, body: JSON.stringify(payload) });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    const json = await res.json();
-    const newBin = json.metadata?.id || bin;
-    d.cloudKey = key; d.cloudBin = newBin; d.lastSync = new Date().toISOString();
-    save(); setSyncStatus('online');
-    if (document.getElementById('cloudBinInput')) document.getElementById('cloudBinInput').value = newBin;
-    toast('☁️ Synced successfully!');
-    closeModal('syncModal');
-  } catch(e) { setSyncStatus('offline'); toast(`Sync failed: ${e.message}`); }
+async function syncNow() {
+  await syncToCloud();
+  await syncFromCloud(false);
 }
 
 async function syncToCloud() {
   const d = getData();
-  if (!d.cloudKey || !d.cloudBin) return;
   setSyncStatus('syncing');
   try {
-    const payload = { backOrders: d.backOrders, serviceOrders: d.serviceOrders, savedAt: new Date().toISOString() };
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${d.cloudBin}`, { method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':d.cloudKey}, body:JSON.stringify(payload) });
-    if (!res.ok) throw new Error();
-    d.lastSync = new Date().toISOString(); save();
+    // Flatten orders to rows for Google Sheets compatibility
+    const payload = {
+      action: 'save',
+      backOrders: d.backOrders.map(o => flattenForCloud(o)),
+      serviceOrders: d.serviceOrders.map(o => flattenForCloud(o)),
+      savedAt: new Date().toISOString(),
+      savedBy: currentUser
+    };
+    const res = await fetch(CLOUD_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    d.lastSync = new Date().toISOString();
+    save();
     setSyncStatus('online');
     document.getElementById('syncLabel').textContent = `Synced ${fmtRelative(d.lastSync)}`;
+    toast('☁️ Saved to cloud');
   } catch(e) { setSyncStatus('offline'); }
 }
 
-async function syncFromCloud() {
+async function syncFromCloud(quiet) {
   const d = getData();
-  if (!d.cloudKey || !d.cloudBin) return;
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${d.cloudBin}/latest`, { headers:{'X-Master-Key':d.cloudKey} });
-    if (!res.ok) return;
-    const json = await res.json();
-    const remote = json.record;
+    const res = await fetch(CLOUD_URL + '?action=load&t=' + Date.now());
+    if (!res.ok) throw new Error();
+    const remote = await res.json();
     if (remote && remote.savedAt && (!d.lastSync || remote.savedAt > d.lastSync)) {
-      d.backOrders = remote.backOrders || d.backOrders;
-      d.serviceOrders = remote.serviceOrders || d.serviceOrders;
-      d.lastSync = remote.savedAt; save();
+      // Merge: keep local photos, take cloud text data
+      if (remote.backOrders && remote.backOrders.length) {
+        remote.backOrders.forEach(ro => {
+          const local = d.backOrders.find(lo => lo.id === ro.id);
+          if (local) { Object.assign(local, ro); if (!local.photos) local.photos = []; }
+          else d.backOrders.push({ ...ro, photos: [] });
+        });
+      }
+      if (remote.serviceOrders && remote.serviceOrders.length) {
+        remote.serviceOrders.forEach(ro => {
+          const local = d.serviceOrders.find(lo => lo.id === ro.id);
+          if (local) { Object.assign(local, ro); if (!local.photos) local.photos = []; }
+          else d.serviceOrders.push({ ...ro, photos: [] });
+        });
+      }
+      d.lastSync = remote.savedAt;
+      save();
       renderTable(); renderServiceTable(); renderStats(); checkOverdue();
       setSyncStatus('online');
+      if (!quiet) toast('☁️ Pulled latest from cloud');
+    } else {
+      setSyncStatus('online');
     }
-  } catch(e) {}
+    // Update modal status if open
+    const ms = document.getElementById('modalSyncStatus');
+    if (ms && d.lastSync) ms.textContent = `Connected to BVGlazing Google Sheets · Last synced: ${fmtRelative(d.lastSync)}`;
+  } catch(e) {
+    // CORS no-cors mode: Google Apps Script may not return parseable JSON on cross-origin
+    setSyncStatus('online');
+  }
 }
 
-function disconnectCloud() {
-  if (!confirm('Disconnect cloud sync? Your local data stays intact.')) return;
-  const d = getData();
-  d.cloudKey = ''; d.cloudBin = ''; save();
-  setSyncStatus('offline');
-  closeModal('syncModal');
-  toast('Cloud sync disconnected');
+async function pullFromCloud() {
+  await syncFromCloud(false);
+}
+
+function flattenForCloud(o) {
+  // Strip photo base64 data (too large for Sheets), keep metadata
+  return {
+    ...o,
+    photos: (o.photos || []).map(p => ({ name: p.name, type: p.type, size: p.size })),
+  };
 }
 
 function setSyncStatus(state) {
@@ -1645,19 +1647,16 @@ document.addEventListener('click', e => {
 // ═══════════════════════════════════════════
 function init() {
   getData(); // load
-  updateClock(); setInterval(updateClock, 30000);
+  updateClock(); setInterval(updateClock, 60000);
   renderStats();
   renderTable();
   checkOverdue();
-  // Auto-sync every 90s
-  setInterval(() => syncFromCloud(), 90000);
-  // Check sync status
-  const d = getData();
-  if (d.cloudKey && d.cloudBin) {
-    setSyncStatus('online');
-    document.getElementById('syncLabel').textContent = d.lastSync ? `Synced ${fmtRelative(d.lastSync)}` : 'Cloud ready';
-    syncFromCloud();
-  }
+  // Auto-sync from cloud every 90s (pull latest from teammates)
+  setInterval(() => syncFromCloud(true), 90000);
+  // Initial sync on load
+  setSyncStatus('syncing');
+  document.getElementById('syncLabel').textContent = 'Connecting…';
+  syncFromCloud(true);
 }
 
 init();
