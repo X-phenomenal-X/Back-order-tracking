@@ -3,1663 +3,1390 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BVGlazing Systems — Order Tracker</title>
+<title>Order Tracker — BVGlazing Systems (Cloud Synced)</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap');
 :root {
-  --navy: #0f2d4a;
-  --navy-light: #1a3f62;
-  --blue: #2563eb;
-  --blue-light: #3b82f6;
-  --orange: #f97316;
-  --orange-light: #fb923c;
-  --red: #ef4444;
-  --yellow: #eab308;
-  --green: #22c55e;
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --white: #ffffff;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow: 0 4px 12px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
-  --radius: 10px;
-  --radius-sm: 6px;
-  --sidebar-w: 220px;
+  --bg: #f5f2ec; --surface: #ffffff; --surface2: #f0ede6; --border: #ddd9d0;
+  --ink: #1a1814; --muted: #8a8478; --accent: #c8410a; --accent2: #2b6cb0;
+  --green: #276749; --yellow: #b7791f;
+  --urgent: #c8410a; --normal: #b7791f; --onhold: #c8720a;
+  --row-overdue: rgba(200,65,10,0.12);
+  --row-urgent: rgba(200,65,10,0.06);
+  --row-onhold: rgba(200,114,10,0.06);
+  --row-done: rgba(39,103,73,0.05);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: var(--gray-50); color: var(--gray-800); display: flex; min-height: 100vh; }
-
-/* ── SIDEBAR ── */
-.sidebar { width: var(--sidebar-w); background: var(--navy); color: var(--white); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; transition: transform .25s; }
-.sidebar-logo { padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,.1); }
-.sidebar-logo .brand { font-size: 15px; font-weight: 700; color: var(--white); letter-spacing: -.3px; }
-.sidebar-logo .sub { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
-.sidebar-logo .address { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 6px; }
-.sidebar-nav { flex: 1; padding: 12px 8px; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; color: rgba(255,255,255,.65); font-size: 13px; font-weight: 500; margin-bottom: 2px; transition: all .15s; user-select: none; }
-.nav-item:hover { background: rgba(255,255,255,.08); color: var(--white); }
-.nav-item.active { background: var(--orange); color: var(--white); }
-.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-.sidebar-user { padding: 14px; border-top: 1px solid rgba(255,255,255,.1); }
-.sidebar-user label { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 6px; }
-.sidebar-user select { width: 100%; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); color: var(--white); border-radius: var(--radius-sm); padding: 7px 10px; font-size: 13px; cursor: pointer; }
-.sidebar-user select option { background: var(--navy); color: var(--white); }
-.sync-badge { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; color: rgba(255,255,255,.45); }
-.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-.sync-dot.offline { background: var(--gray-400); }
-.sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-/* ── MAIN ── */
-.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-.topbar { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-.topbar-left h1 { font-size: 18px; font-weight: 700; color: var(--gray-800); }
-.topbar-left .breadcrumb { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
-.topbar-right { display: flex; align-items: center; gap: 10px; }
-.topbar-time { font-size: 12px; color: var(--gray-400); }
-
-/* ── BUTTONS ── */
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; white-space: nowrap; }
-.btn-primary { background: var(--orange); color: var(--white); }
-.btn-primary:hover { background: var(--orange-light); }
-.btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
-.btn-secondary:hover { background: var(--gray-200); }
-.btn-blue { background: var(--blue); color: var(--white); }
-.btn-blue:hover { background: var(--blue-light); }
-.btn-danger { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
-.btn-danger:hover { background: #fee2e2; }
-.btn-ghost { background: transparent; color: var(--gray-500); border: 1px solid var(--gray-200); }
-.btn-ghost:hover { background: var(--gray-100); }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
-.btn-icon { padding: 7px; border-radius: var(--radius-sm); background: transparent; border: 1px solid var(--gray-200); cursor: pointer; color: var(--gray-500); font-size: 15px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; }
-.btn-icon:hover { background: var(--gray-100); color: var(--gray-700); }
-
-/* ── CONTENT AREA ── */
-.content { padding: 20px 24px; flex: 1; }
-
-/* ── STATS GRID ── */
-.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
-.stat-card { background: var(--white); border-radius: var(--radius); padding: 16px 18px; border: 1px solid var(--gray-200); box-shadow: var(--shadow-sm); cursor: pointer; transition: all .15s; position: relative; overflow: hidden; }
-.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
-.stat-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--gray-400); margin-bottom: 8px; }
-.stat-card .value { font-size: 28px; font-weight: 800; line-height: 1; }
-.stat-card .sub { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
-.stat-card.overdue { border-left: 3px solid var(--red); }
-.stat-card.overdue .value { color: var(--red); }
-.stat-card.urgent { border-left: 3px solid var(--orange); }
-.stat-card.urgent .value { color: var(--orange); }
-.stat-card.active { border-left: 3px solid var(--blue); }
-.stat-card.active .value { color: var(--blue); }
-.stat-card.hold { border-left: 3px solid var(--yellow); }
-.stat-card.hold .value { color: var(--yellow); }
-.stat-card.done { border-left: 3px solid var(--green); }
-.stat-card.done .value { color: var(--green); }
-
-/* ── FILTERS ROW ── */
-.filters-row { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-.filters-row input[type=search], .filters-row select { border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 13px; color: var(--gray-700); background: var(--gray-50); outline: none; transition: border-color .15s; }
-.filters-row input[type=search] { min-width: 220px; }
-.filters-row input[type=search]:focus, .filters-row select:focus { border-color: var(--blue); }
-.filter-sep { flex: 1; }
-.tab-pills { display: flex; gap: 4px; background: var(--gray-100); border-radius: var(--radius-sm); padding: 3px; }
-.tab-pill { padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--gray-500); transition: all .15s; }
-.tab-pill.active { background: var(--white); color: var(--navy); box-shadow: var(--shadow-sm); }
-
-/* ── TABLE ── */
-.table-wrap { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
-table { width: 100%; border-collapse: collapse; }
-thead th { background: var(--gray-50); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--gray-200); white-space: nowrap; cursor: pointer; user-select: none; }
-thead th:hover { color: var(--gray-700); }
-thead th .sort-icon { margin-left: 4px; opacity: .4; }
-tbody tr { border-bottom: 1px solid var(--gray-100); transition: background .1s; }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: #f8fafd; }
-tbody tr.overdue-row { background: #fff8f8; }
-tbody tr.overdue-row:hover { background: #fff0f0; }
-td { padding: 10px 12px; font-size: 13px; vertical-align: middle; }
-td.job-code { font-weight: 600; color: var(--navy); font-family: monospace; font-size: 13px; }
-td.project { font-weight: 500; color: var(--gray-800); max-width: 160px; }
-td.project .sub-text { font-size: 11px; color: var(--gray-400); font-weight: 400; }
-td.due-cell { white-space: nowrap; }
-td.due-cell.overdue { color: var(--red); font-weight: 600; }
-td.due-cell .overdue-tag { font-size: 10px; display: block; }
-
-/* ── BADGES ── */
-.badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-.badge-urgent { background: #fff7ed; color: var(--orange); border: 1px solid #fed7aa; }
-.badge-normal { background: #eff6ff; color: var(--blue); border: 1px solid #bfdbfe; }
-.badge-hold { background: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
-.badge-pending { background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--gray-200); }
-.badge-inprogress { background: #eff6ff; color: var(--blue); border: 1px solid #bfdbfe; }
-.badge-completed { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.badge-onhold { background: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
-.avatar { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; font-size: 10px; font-weight: 700; color: var(--white); flex-shrink: 0; }
-
-/* ── ACTION BUTTONS IN TABLE ── */
-.row-actions { display: flex; gap: 4px; align-items: center; }
-.action-btn { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
-.action-view { background: var(--gray-100); color: var(--gray-600); }
-.action-view:hover { background: var(--gray-200); }
-.action-done { background: #f0fdf4; color: #15803d; }
-.action-done:hover { background: #dcfce7; }
-.action-edit { background: #eff6ff; color: var(--blue); }
-.action-edit:hover { background: #dbeafe; }
-.action-del { background: #fef2f2; color: var(--red); }
-.action-del:hover { background: #fee2e2; }
-
-/* ── PHOTO THUMBS IN TABLE ── */
-.photo-thumbs { display: flex; gap: 3px; align-items: center; }
-.photo-thumb { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; cursor: pointer; border: 1px solid var(--gray-200); }
-.photo-count { font-size: 11px; color: var(--gray-400); }
-
-/* ── MODAL OVERLAY ── */
-.overlay { position: fixed; inset: 0; background: rgba(15,45,74,.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
-.overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--white); border-radius: 14px; box-shadow: var(--shadow-lg); width: 100%; max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; transform: translateY(10px); transition: transform .2s; overflow: hidden; }
-.overlay.open .modal { transform: translateY(0); }
-.modal.modal-lg { max-width: 860px; }
-.modal.modal-sm { max-width: 460px; }
-.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.modal-header h2 { font-size: 16px; font-weight: 700; color: var(--gray-800); }
-.modal-header .modal-close { background: var(--gray-100); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 16px; color: var(--gray-500); display: flex; align-items: center; justify-content: center; }
-.modal-header .modal-close:hover { background: var(--gray-200); }
-.modal-body { overflow-y: auto; flex: 1; padding: 20px 24px; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0; }
-
-/* ── FORM ── */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
-.form-col-full { grid-column: 1 / -1; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.form-group label { font-size: 12px; font-weight: 600; color: var(--gray-600); }
-.form-group input, .form-group select, .form-group textarea { border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 8px 11px; font-size: 13px; color: var(--gray-800); outline: none; transition: border-color .15s; background: var(--white); font-family: inherit; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
-.form-group textarea { resize: vertical; min-height: 80px; }
-.form-section { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--gray-400); margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-100); grid-column: 1 / -1; }
-
-/* ── PHOTO UPLOAD ── */
-.photo-upload-area { border: 2px dashed var(--gray-200); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: all .15s; background: var(--gray-50); }
-.photo-upload-area:hover { border-color: var(--blue); background: #eff6ff; }
-.photo-upload-area .upload-icon { font-size: 28px; margin-bottom: 6px; }
-.photo-upload-area p { font-size: 12px; color: var(--gray-400); }
-.photo-upload-area strong { color: var(--blue); }
-.photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-top: 10px; }
-.photo-item { position: relative; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 1; background: var(--gray-100); }
-.photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-.photo-item .file-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 22px; cursor: pointer; }
-.photo-item .file-name { font-size: 9px; color: var(--gray-500); margin-top: 3px; text-align: center; padding: 0 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 100%; }
-.photo-item .remove-photo { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,.6); color: white; border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-/* ── DETAIL VIEW ── */
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-.detail-item { background: var(--gray-50); border-radius: var(--radius-sm); padding: 10px 12px; }
-.detail-item .dl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--gray-400); margin-bottom: 3px; }
-.detail-item .dv { font-size: 13px; color: var(--gray-800); font-weight: 500; }
-.comments-area { margin-top: 16px; }
-.comments-area h4 { font-size: 12px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
-.comment-item { background: var(--gray-50); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; }
-.comment-item .meta { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; }
-.comment-item .text { font-size: 13px; color: var(--gray-700); }
-.comment-input-row { display: flex; gap: 8px; margin-top: 10px; }
-.comment-input-row input { flex: 1; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 8px 11px; font-size: 13px; outline: none; }
-.comment-input-row input:focus { border-color: var(--blue); }
-
-/* ── ACTIVITY LOG ── */
-.activity-log { margin-top: 16px; }
-.activity-log h4 { font-size: 12px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
-.activity-item { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--gray-100); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background: var(--bg); color: var(--ink); font-family: 'Lato', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+/* HEADER */
+.header { background: var(--surface); border-bottom: 2px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 6px rgba(0,0,0,0.06); flex-wrap: wrap; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.header-logo img { display:block; border-radius:8px; }
+.brand-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; color: #1a2e4a; line-height: 1.2; }
+.brand-title { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; }
+.header-sub { font-size: 0.65rem; color: var(--muted); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+.header-right { display: flex; align-items: center; gap: 14px; }
+.user-picker { display: flex; align-items: center; gap: 6px; background: var(--surface2); padding: 6px 10px; border-radius: 20px; border: 1px solid var(--border); }
+.user-picker label { font-size: 0.65rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
+.user-picker select { background: transparent; border: none; outline: none; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--ink); cursor: pointer; padding-right: 4px; }
+.notif-bell { position: relative; cursor: pointer; padding: 6px 10px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); font-size: 1rem; transition: all 0.2s; }
+.notif-bell:hover { background: var(--bg); }
+.notif-badge { position: absolute; top: -4px; right: -4px; background: var(--urgent); color: #fff; border-radius: 10px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 0.65rem; font-weight: 700; display: none; align-items: center; justify-content: center; }
+.notif-badge.show { display: flex; }
+.clock-mini { display: flex; flex-direction: column; align-items: flex-end; }
+#hclock { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; color: var(--ink); font-weight: 500; }
+#hdate { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: var(--muted); }
+/* TABS */
+.tabs { display: flex; background: var(--surface); padding: 0 24px; border-bottom: 2px solid var(--border); gap: 4px; overflow-x: auto; }
+.tab { padding: 11px 20px; font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; border-radius: 4px 4px 0 0; white-space: nowrap; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(200,65,10,0.04); }
+.tab:hover:not(.active) { color: var(--ink); background: var(--surface2); }
+.content { padding: 20px 24px; }
+/* DAILY SUMMARY */
+.daily-summary { background: linear-gradient(135deg, #1a2e4a 0%, #2c4567 100%); color: #fff; border-radius: 12px; padding: 16px 22px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 18px; box-shadow: 0 4px 16px rgba(26,46,74,0.15); flex-wrap: wrap; }
+.summary-greeting h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+.summary-greeting p { font-size: 0.82rem; opacity: 0.9; line-height: 1.5; }
+.summary-stats { display: flex; gap: 14px; }
+.summary-stat { text-align: center; padding: 0 12px; border-left: 1px solid rgba(255,255,255,0.2); }
+.summary-stat:first-child { border-left: none; }
+.summary-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.summary-label { font-size: 0.6rem; letter-spacing: 1.2px; text-transform: uppercase; opacity: 0.75; margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
+/* QUICK FILTER PILLS */
+.quick-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.qf-pill { padding: 6px 14px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Syne', sans-serif; letter-spacing: 0.5px; }
+.qf-pill:hover { border-color: var(--accent); }
+.qf-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.qf-pill .count { display: inline-block; margin-left: 5px; padding: 1px 7px; background: rgba(0,0,0,0.1); border-radius: 10px; font-size: 0.68rem; }
+.qf-pill.active .count { background: rgba(255,255,255,0.25); }
+/* KPI ROW */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; border-top: 3px solid var(--border); }
+.kpi-card.red-top { border-top-color: var(--urgent); }
+.kpi-card.blue-top { border-top-color: var(--normal); }
+.kpi-card.gray-top { border-top-color: var(--onhold); }
+.kpi-card.green-top { border-top-color: var(--green); }
+.kpi-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-val { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1; color: var(--ink); }
+.kpi-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+/* INSIGHTS */
+.insights-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-bottom: 18px; }
+.insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.insight-title { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.chart-container { height: 160px; display: flex; align-items: flex-end; gap: 6px; padding: 6px 0 18px 0; position: relative; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.bar { width: 100%; max-width: 36px; background: linear-gradient(to top, var(--accent), #e57334); border-radius: 4px 4px 0 0; cursor: pointer; position: relative; min-height: 3px; transition: transform 0.2s; }
+.bar:hover { transform: translateY(-2px); }
+.bar-tooltip { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.68rem; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.bar:hover .bar-tooltip { opacity: 1; }
+.bar-label { font-size: 0.62rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.recurring-list { display: flex; flex-direction: column; gap: 6px; }
+.recurring-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--surface2); border-radius: 6px; border-left: 3px solid var(--accent); }
+.recurring-name { font-size: 0.8rem; font-weight: 700; }
+.recurring-meta { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+.recurring-count { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+/* TOOLBAR */
+.toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.search-box { flex: 1; min-width: 180px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.82rem; outline: none; }
+.search-box:focus { border-color: var(--accent); }
+select.filter-sel { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; outline: none; cursor: pointer; }
+.btn { padding: 8px 16px; border-radius: 6px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #a33408; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+.btn-outline:hover { border-color: var(--ink); }
+.btn-sm { padding: 4px 10px; font-size: 0.62rem; border-radius: 4px; }
+/* OVERDUE BANNER */
+.overdue-banner { background: rgba(200,65,10,0.08); border: 1px solid rgba(200,65,10,0.3); border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.78rem; color: var(--accent); font-weight: 700; }
+.overdue-banner span { font-weight: 400; color: var(--ink); }
+/* TABLE */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+thead { background: var(--ink); }
+th { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 1.3px; text-transform: uppercase; color: #9a9690; padding: 10px 12px; text-align: left; white-space: nowrap; }
+td { padding: 10px 12px; font-size: 0.8rem; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr.row-overdue td { background: var(--row-overdue) !important; }
+tr.row-urgent td { background: var(--row-urgent); }
+tr.row-onhold td { background: var(--row-onhold); }
+tr.row-done td { background: var(--row-done); opacity: 0.55; }
+tr.row-done .order-id { text-decoration: line-through; }
+tr:hover td { background: var(--surface2) !important; }
+tr.row-overdue td:first-child { border-left: 3px solid var(--accent); }
+tr.row-urgent td:first-child { border-left: 3px solid var(--urgent); }
+tr.row-onhold td:first-child { border-left: 3px solid var(--onhold); }
+tr.row-done td:first-child { border-left: 3px solid var(--green); }
+.order-id { font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; font-weight: 500; color: var(--accent2); }
+.priority-badge { display: inline-block; padding: 3px 9px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; }
+.pri-Urgent { background: rgba(200,65,10,0.12); color: var(--urgent); border: 1px solid rgba(200,65,10,0.25); }
+.pri-Normal { background: rgba(183,121,31,0.12); color: var(--normal); border: 1px solid rgba(183,121,31,0.25); }
+.pri-On-Hold { background: rgba(200,114,10,0.12); color: var(--onhold); border: 1px solid rgba(200,114,10,0.25); }
+.status-badge { display: inline-block; padding: 3px 9px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; text-transform: uppercase; }
+.st-Pending { background: rgba(183,121,31,0.12); color: var(--yellow); }
+.st-In-Progress { background: rgba(43,108,176,0.12); color: var(--accent2); }
+.st-Completed { background: rgba(39,103,73,0.12); color: var(--green); }
+.st-On-Hold { background: rgba(200,114,10,0.12); color: var(--onhold); }
+.date-cell { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; line-height: 1.3; }
+.date-cell.overdue { color: var(--accent); font-weight: 700; }
+.days-overdue { display: block; font-size: 0.62rem; font-weight: 700; color: var(--urgent); margin-top: 1px; }
+.days-pending { display: block; font-size: 0.62rem; color: var(--muted); margin-top: 1px; }
+.days-pending.warn { color: var(--accent); font-weight: 700; }
+.assignee-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 0.76rem; }
+.assignee-avatar { width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 0.62rem; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; }
+.action-btns { display: flex; gap: 4px; }
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,24,20,0.6); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); padding: 12px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: 12px; padding: 22px 24px; width: 680px; max-width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.form-input, .form-select, .form-textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); font-family: 'Lato', sans-serif; font-size: 0.82rem; outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 64px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+/* PHOTO */
+.photo-upload-area { border: 2px dashed var(--border); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; background: var(--bg); }
+.photo-upload-area:hover { border-color: var(--accent); }
+.photo-upload-area input[type=file] { display: none; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; margin-top: 8px; }
+.photo-thumb { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; }
+/* COMMENTS */
+.comments-section { grid-column: 1/-1; padding-top: 10px; border-top: 1px solid var(--border); }
+.comments-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.comments-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-bottom: 10px; }
+.comment { background: var(--surface2); border-radius: 6px; padding: 8px 12px; border-left: 3px solid var(--accent2); }
+.comment-meta { font-size: 0.66rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-bottom: 4px; }
+.comment-text { font-size: 0.8rem; line-height: 1.4; }
+.comment-text .mention { background: rgba(43,108,176,0.15); color: var(--accent2); padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+.comment-input-row { display: flex; gap: 6px; }
+.comment-input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.82rem; outline: none; }
+.comment-input:focus { border-color: var(--accent); }
+/* ACTIVITY LOG */
+.activity-section { grid-column: 1/-1; padding-top: 10px; border-top: 1px solid var(--border); }
+.activity-list { max-height: 160px; overflow-y: auto; }
+.activity-item { font-size: 0.74rem; padding: 5px 0; border-bottom: 1px dashed var(--surface2); display: flex; gap: 8px; align-items: baseline; }
 .activity-item:last-child { border: none; }
-.activity-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; margin-top: 5px; }
-.activity-text { font-size: 12px; color: var(--gray-600); }
-.activity-time { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
-
-/* ── WEEKLY CHART ── */
-.chart-wrap { margin: 10px 0; }
-.chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-bottom: 4px; }
-.chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-.chart-bar { width: 100%; background: var(--blue); border-radius: 4px 4px 0 0; min-height: 3px; transition: height .3s; position: relative; }
-.chart-bar.today { background: var(--orange); }
-.chart-bar-label { font-size: 10px; color: var(--gray-400); }
-.chart-bar-val { font-size: 10px; color: var(--gray-500); }
-
-/* ── NOTIFICATION PANEL ── */
-.notif-btn { position: relative; }
-.notif-count { position: absolute; top: -4px; right: -4px; background: var(--red); color: white; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 10px; min-width: 16px; text-align: center; }
-.notif-panel { position: fixed; top: 56px; right: 16px; width: 320px; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 300; display: none; max-height: 400px; overflow-y: auto; }
-.notif-panel.open { display: block; }
-.notif-panel-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
-.notif-panel-header h3 { font-size: 13px; font-weight: 700; }
-.notif-item { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); }
-.notif-item:last-child { border: none; }
-.notif-item.unread { background: #f0f7ff; }
-.notif-item .notif-title { font-size: 13px; font-weight: 600; color: var(--gray-800); }
-.notif-item .notif-msg { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
-.notif-item .notif-time { font-size: 10px; color: var(--gray-400); margin-top: 4px; }
-.notif-empty { padding: 24px; text-align: center; color: var(--gray-400); font-size: 13px; }
-
-/* ── CLOUD SYNC MODAL ── */
-.sync-status-bar { background: var(--gray-50); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; border: 1px solid var(--gray-200); }
-.sync-instructions { background: var(--gray-50); border-radius: var(--radius-sm); padding: 14px; font-size: 12px; color: var(--gray-600); line-height: 1.7; border: 1px solid var(--gray-200); }
-.sync-instructions a { color: var(--blue); }
-.sync-instructions ol { padding-left: 16px; margin-top: 6px; }
-
-/* ── RECURRING PROBLEMS ── */
-.recurring-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.recurring-item { background: #fff8f2; border: 1px solid #fed7aa; border-radius: var(--radius-sm); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
-.recurring-item .project-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
-.recurring-item .rec-detail { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
-
-/* ── WELCOME BANNER ── */
-.welcome-bar { background: linear-gradient(135deg, var(--navy), var(--navy-light)); color: var(--white); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
-.welcome-bar h2 { font-size: 16px; font-weight: 700; }
-.welcome-bar p { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 3px; }
-.welcome-bar .alert-chip { background: var(--red); color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-
-/* ── EMPTY STATE ── */
-.empty-state { text-align: center; padding: 48px 24px; color: var(--gray-400); }
-.empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
-.empty-state p { font-size: 14px; }
-
-/* ── SECTION HEADER ── */
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.section-header h3 { font-size: 14px; font-weight: 700; color: var(--gray-700); }
-
-/* ── REPORT MODAL ── */
-.report-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-.report-stat { background: var(--gray-50); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
-.report-stat .rs-val { font-size: 24px; font-weight: 800; color: var(--navy); }
-.report-stat .rs-label { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
-
-/* ── MOBILE ── */
+.activity-time { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--muted); white-space: nowrap; }
+.activity-text { color: var(--ink); }
+.activity-text strong { color: var(--accent2); }
+/* FAB */
+.fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; border: none; box-shadow: 0 6px 20px rgba(200,65,10,0.4); cursor: pointer; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 50; }
+.fab:hover { transform: scale(1.08); box-shadow: 0 8px 24px rgba(200,65,10,0.5); }
+/* AUTOSAVE */
+.autosave-indicator { position: fixed; bottom: 20px; left: 20px; background: var(--green); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.7rem; font-family: 'IBM Plex Mono', monospace; opacity: 0; transition: opacity 0.3s; z-index: 50; box-shadow: 0 4px 12px rgba(39,103,73,0.3); }
+.autosave-indicator.show { opacity: 1; }
+/* NOTIFICATIONS */
+#notification-area { position: fixed; top: 80px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 10px; max-width: 340px; }
+.notification { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--urgent); border-radius: 8px; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: slideInRight 0.3s ease; cursor: pointer; }
+.notification.success { border-left-color: var(--green); }
+.notification.warning { border-left-color: var(--yellow); }
+@keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.notif-title { font-weight: 700; font-size: 0.82rem; margin-bottom: 3px; }
+.notif-msg { font-size: 0.74rem; color: var(--muted); line-height: 1.4; }
+/* NOTIF DROPDOWN */
+.notif-dropdown { position: fixed; top: 70px; right: 16px; width: 340px; max-height: 480px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); z-index: 150; display: none; overflow: hidden; }
+.notif-dropdown.open { display: flex; flex-direction: column; }
+.notif-dropdown-header { padding: 12px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+.notif-dropdown-header button { background: transparent; border: none; color: var(--accent2); font-size: 0.7rem; cursor: pointer; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; }
+.notif-dropdown-list { flex: 1; overflow-y: auto; padding: 6px; }
+.notif-row { padding: 10px 12px; border-radius: 6px; cursor: pointer; border-left: 3px solid var(--border); margin-bottom: 4px; }
+.notif-row:hover { background: var(--surface2); }
+.notif-row.unread { background: rgba(43,108,176,0.05); border-left-color: var(--accent2); }
+.notif-row.urgent { border-left-color: var(--urgent); }
+.notif-row-title { font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; }
+.notif-row-msg { font-size: 0.7rem; color: var(--muted); line-height: 1.3; }
+.notif-row-time { font-size: 0.62rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
+/* LIGHTBOX */
+.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; display: none; align-items: center; justify-content: center; cursor: pointer; }
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+/* MOBILE */
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.mobile-open { transform: translateX(0); }
-  .main { margin-left: 0; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .topbar { padding: 12px 16px; }
-  .content { padding: 14px 16px; }
-  .form-grid { grid-template-columns: 1fr; }
-  .form-grid.three { grid-template-columns: 1fr 1fr; }
-  .mobile-menu-btn { display: flex; }
-  table { font-size: 12px; }
+  body { padding-bottom: 90px; }
+  .header { padding: 10px 12px; flex-wrap: nowrap; gap: 8px; }
+  .header-left { flex: 1; min-width: 0; gap: 10px; }
+  .header-logo img { width: 38px !important; height: 38px !important; }
+  .brand-name { font-size: 0.9rem; }
+  .brand-title { font-size: 0.62rem; letter-spacing: 1px; }
+  .header-sub { display: none; }
+  .clock-mini { display: none; }
+  .header-right { gap: 6px; flex-shrink: 0; }
+  .user-picker { padding: 4px 8px; }
+  .user-picker label { display: none; }
+  .user-picker select { font-size: 0.75rem; max-width: 80px; }
+  .notif-bell { padding: 4px 8px; font-size: 0.9rem; }
+  
+  .tabs { padding: 0 12px; }
+  .tab { padding: 10px 14px; font-size: 0.7rem; letter-spacing: 1px; }
+  .tab[onclick*="Weekly"], .tab[onclick*="Sync"] { margin-left: 0 !important; padding: 10px 10px; font-size: 0.65rem; }
+  
+  .content { padding: 12px; }
+  
+  .daily-summary { padding: 14px 16px; flex-direction: column !important; align-items: stretch !important; gap: 14px; display: flex !important; }
+  .summary-greeting h2 { font-size: 1.05rem; }
+  .summary-greeting p { font-size: 0.78rem; }
+  .summary-stats { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .summary-stat { padding: 8px 4px !important; border: none !important; background: rgba(255,255,255,0.08); border-radius: 6px; }
+  .summary-num { font-size: 1.15rem; }
+  .summary-label { font-size: 0.55rem; letter-spacing: 0.8px; }
+  
+  .quick-filters { gap: 6px; }
+  .qf-pill { padding: 6px 10px; font-size: 0.68rem; }
+  
+  .kpi-row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .kpi-card { padding: 12px 14px; }
+  .kpi-val { font-size: 1.7rem; }
+  .kpi-label { font-size: 0.55rem; }
+  .kpi-sub { font-size: 0.65rem; }
+  
+  .insights-row { display: grid !important; grid-template-columns: 1fr !important; gap: 12px; }
+  .insight-card { padding: 14px; }
+  .insight-title { font-size: 0.75rem; }
+  .chart-container { height: 140px; }
+  
+  .toolbar { gap: 6px; }
+  .search-box { min-width: 100%; flex-basis: 100%; }
+  .filter-sel, .toolbar .btn { flex: 1; min-width: 0; }
+  .btn { padding: 7px 10px; font-size: 0.62rem; letter-spacing: 0.8px; }
+  
+  table { min-width: 700px; }
+  th, td { padding: 8px 10px; font-size: 0.74rem; }
+  
+  .modal { padding: 18px; max-height: 95vh; border-radius: 10px; }
+  .modal-title { font-size: 0.95rem; }
+  .form-grid { grid-template-columns: 1fr !important; }
+  .modal-actions { flex-wrap: wrap; }
+  .modal-actions .btn { flex: 1; min-width: 100px; }
+  .modal-actions .btn[onclick*="emailOrder"] { margin-right: 0 !important; flex-basis: 100%; }
+  
+  .fab { width: 56px; height: 56px; bottom: 16px; right: 16px; font-size: 1.8rem; }
+  .notif-dropdown { right: 8px; left: 8px; width: auto; top: 60px; max-height: 70vh; }
+  #notification-area { right: 8px; left: 8px; max-width: none; top: 60px; }
+  .autosave-indicator { bottom: 80px; left: 16px; }
+  
+  .report-content { padding: 20px; max-height: 95vh; }
 }
-.mobile-menu-btn { display: none; }
-.mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; }
-.mobile-overlay.open { display: block; }
-
-/* ── PRINT ── */
+@media (max-width: 420px) {
+  .summary-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
+}
 @media print {
-  .sidebar, .topbar, .filters-row, .row-actions, .btn, .notif-btn { display: none !important; }
-  .main { margin-left: 0; }
-  .content { padding: 0; }
+  .tabs, .toolbar, .action-btns, .modal-overlay, .header, #notification-area, .autosave-indicator, .insights-row, .daily-summary, .quick-filters, .fab, .notif-dropdown { display: none !important; }
+  body { background: #fff; padding: 20px; }
   .table-wrap { box-shadow: none; border: 1px solid #ccc; }
 }
-
-/* ── MISC ── */
-.text-muted { color: var(--gray-400); }
-.text-sm { font-size: 12px; }
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.d-flex { display: flex; align-items: center; gap: 8px; }
-.overdue-pill { background: #fee2e2; color: var(--red); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
-.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--gray-200); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.toast { position: fixed; bottom: 20px; right: 20px; background: var(--gray-800); color: white; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; z-index: 9999; box-shadow: var(--shadow-lg); animation: slideUp .3s ease; }
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* WEEKLY REPORT */
+#report-modal { display: none; }
+#report-modal.open { display: flex; }
+.report-content { max-width: 700px; width: 100%; max-height: 92vh; overflow-y: auto; background: #fff; border-radius: 12px; padding: 28px; }
+.report-section { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.report-section h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; margin-bottom: 8px; color: var(--accent); }
+.report-section ul { list-style: none; padding: 0; }
+.report-section li { padding: 5px 0; font-size: 0.85rem; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.3s ease forwards; }
 </style>
 </head>
 <body>
-
-<!-- Mobile overlay -->
-<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="brand">🏗 BVGlazing Systems</div>
-    <div class="address">131 Caldari Road, Concord, ON</div>
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <img src="data:image/jpeg;base64,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" alt="BVGlazing Systems" width="48" height="48">
+    </div>
+    <div>
+      <div class="brand-name">BVGlazing Systems</div>
+      <div class="brand-title">Order Tracker</div>
+      <div class="header-sub">131 Caldari Road, Concord, ON · ☁️ Cloud Synced</div>
+    </div>
   </div>
-  <nav class="sidebar-nav">
-    <div class="nav-item active" id="nav-back" onclick="showTab('back')"><span class="icon">📦</span> Back Orders</div>
-    <div class="nav-item" id="nav-service" onclick="showTab('service')"><span class="icon">🔧</span> Service Orders</div>
-    <div class="nav-item" id="nav-report" onclick="openReport()"><span class="icon">📊</span> Weekly Report</div>
-    <div class="nav-item" id="nav-sync" onclick="openSyncModal()"><span class="icon">☁️</span> Cloud Sync</div>
-  </nav>
-  <div class="sidebar-user">
-    <label>Logged in as</label>
-    <select id="userSelect" onchange="changeUser(this.value)">
-      <option>Abhay</option><option>Firas</option><option>Derek M.</option>
-      <option>James T.</option><option>Carlos R.</option><option>Sara K.</option><option>Mike P.</option>
+  <div class="header-right">
+    <div class="user-picker">
+      <label>User:</label>
+      <select id="user-select" onchange="changeUser()"></select>
+    </div>
+    <div class="notif-bell" onclick="toggleNotifDropdown()">
+      🔔
+      <div class="notif-badge" id="notif-badge">0</div>
+    </div>
+    <div class="clock-mini">
+      <div id="hclock">--:--</div>
+      <div id="hdate">---</div>
+    </div>
+  </div>
+</div>
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('backorders')">Back Orders</div>
+  <div class="tab" onclick="switchTab('serviceorders')">Service Orders</div>
+  <div class="tab" onclick="openWeeklyReport()" style="margin-left:auto;color:var(--accent2)">📊 Weekly Report</div>
+  <div class="tab" onclick="openSyncModal()" style="color:var(--accent2)">☁️ Sync</div>
+</div>
+<div class="content">
+  <!-- DAILY SUMMARY -->
+  <div class="daily-summary" id="daily-summary"></div>
+  <!-- QUICK FILTERS -->
+  <div class="quick-filters" id="quick-filters"></div>
+  <!-- KPI ROW -->
+  <div class="kpi-row" id="kpi-row"></div>
+  <!-- INSIGHTS -->
+  <div class="insights-row">
+    <div class="insight-card">
+      <div class="insight-title">📊 Weekly Trend — Completed Orders (Last 7 Days)</div>
+      <div class="chart-container" id="weekly-chart"></div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">🔁 Recurring Problems</div>
+      <div class="recurring-list" id="recurring-list"></div>
+    </div>
+  </div>
+  <!-- OVERDUE BANNER -->
+  <div class="overdue-banner" id="overdue-banner" style="display:none">⚠ <span id="overdue-text"></span></div>
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <input class="search-box" type="text" id="search-input" placeholder="🔍 Search…" oninput="renderTable()">
+    <select class="filter-sel" id="filter-priority" onchange="renderTable()">
+      <option value="">All Priorities</option><option>Urgent</option><option>Normal</option><option>On Hold</option>
     </select>
-    <div class="sync-badge"><div class="sync-dot" id="syncDot"></div><span id="syncLabel">Not synced</span></div>
+    <select class="filter-sel" id="filter-status" onchange="renderTable()">
+      <option value="">All Statuses</option><option>Pending</option><option>In-Progress</option><option>Completed</option><option>On-Hold</option>
+    </select>
+    <button class="btn btn-outline" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn btn-outline" onclick="manualSync()" title="Refresh from cloud">☁ Sync Now</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
   </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="d-flex">
-      <button class="btn-icon mobile-menu-btn" onclick="openMobileMenu()">☰</button>
-      <div class="topbar-left">
-        <h1 id="pageTitle">Back Orders</h1>
-        <div class="breadcrumb">BVGlazing Systems · Order Management</div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <span class="topbar-time" id="clockDisplay"></span>
-      <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ CSV</button>
-      <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Print</button>
-      <button class="btn btn-primary" id="newOrderBtn" onclick="openNewOrder()">+ New Order</button>
-      <div class="notif-btn" style="position:relative;">
-        <button class="btn-icon" onclick="toggleNotif()" id="notifBtn">🔔</button>
-        <span class="notif-count" id="notifCount" style="display:none">0</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- WELCOME BAR -->
-    <div class="welcome-bar" id="welcomeBar">
-      <div>
-        <h2 id="welcomeMsg">Good morning 👋</h2>
-        <p id="welcomeSub">Loading orders...</p>
-      </div>
-      <div id="overdueChip"></div>
-    </div>
-
-    <!-- STATS GRID -->
-    <div class="stats-grid">
-      <div class="stat-card overdue" onclick="filterByStatus('overdue')">
-        <div class="label">Overdue</div>
-        <div class="value" id="statOverdue">0</div>
-        <div class="sub">past due date</div>
-      </div>
-      <div class="stat-card urgent" onclick="filterByPriority('Urgent')">
-        <div class="label">Urgent</div>
-        <div class="value" id="statUrgent">0</div>
-        <div class="sub">open orders</div>
-      </div>
-      <div class="stat-card active" onclick="filterByStatus('In-Progress')">
-        <div class="label">Active</div>
-        <div class="value" id="statActive">0</div>
-        <div class="sub">in progress</div>
-      </div>
-      <div class="stat-card hold" onclick="filterByStatus('On-Hold')">
-        <div class="label">On Hold</div>
-        <div class="value" id="statHold">0</div>
-        <div class="sub">paused</div>
-      </div>
-      <div class="stat-card done" onclick="filterByStatus('Completed')">
-        <div class="label">Completed</div>
-        <div class="value" id="statDone">0</div>
-        <div class="sub">this month</div>
-      </div>
-    </div>
-
-    <!-- BACK ORDERS SECTION -->
-    <div id="section-back">
-      <!-- Filters -->
-      <div class="filters-row">
-        <input type="search" id="searchBox" placeholder="🔍 Search orders, projects…" oninput="renderTable()">
-        <select id="filterPriority" onchange="renderTable()">
-          <option value="">All Priorities</option>
-          <option>Urgent</option><option>Normal</option><option>On Hold</option>
-        </select>
-        <select id="filterStatus" onchange="renderTable()">
-          <option value="">All Statuses</option>
-          <option>Pending</option><option>In-Progress</option><option>Completed</option><option>On-Hold</option>
-        </select>
-        <select id="filterAssignee" onchange="renderTable()">
-          <option value="">All Assignees</option>
-          <option>Abhay</option><option>Firas</option><option>Derek M.</option>
-          <option>James T.</option><option>Carlos R.</option><option>Sara K.</option><option>Mike P.</option>
-        </select>
-        <select id="filterView" onchange="renderTable()">
-          <option value="">All Orders</option>
-          <option value="mine">My Orders</option>
-        </select>
-        <div class="filter-sep"></div>
-      </div>
-
-      <!-- Orders table -->
-      <div class="table-wrap">
-        <table id="ordersTable">
-          <thead>
-            <tr>
-              <th onclick="sortBy('id')">Order # <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('jobCode')">Job Code <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('workOrder')">Work Order <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('projectName')">Project <span class="sort-icon">↕</span></th>
-              <th>Floor / Unit</th>
-              <th onclick="sortBy('dueDate')">Due Date <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('priority')">Priority <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('status')">Status <span class="sort-icon">↕</span></th>
-              <th>Assigned</th>
-              <th>Reason</th>
-              <th>Photos</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ordersBody"></tbody>
-        </table>
-        <div id="ordersEmpty" class="empty-state" style="display:none">
-          <div class="empty-icon">📭</div>
-          <p>No orders match your filters.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- SERVICE ORDERS SECTION -->
-    <div id="section-service" style="display:none">
-      <div class="filters-row">
-        <input type="search" id="searchBoxSvc" placeholder="🔍 Search service orders…" oninput="renderServiceTable()">
-        <select id="filterStatusSvc" onchange="renderServiceTable()">
-          <option value="">All Statuses</option>
-          <option>Pending</option><option>In-Progress</option><option>Completed</option><option>On-Hold</option>
-        </select>
-        <select id="filterAssigneeSvc" onchange="renderServiceTable()">
-          <option value="">All Assignees</option>
-          <option>Abhay</option><option>Firas</option><option>Derek M.</option>
-          <option>James T.</option><option>Carlos R.</option><option>Sara K.</option><option>Mike P.</option>
-        </select>
-        <div class="filter-sep"></div>
-      </div>
-      <div class="table-wrap">
-        <table id="serviceTable">
-          <thead>
-            <tr>
-              <th>Order #</th><th>Job Code</th><th>Project</th><th>Floor / Unit</th>
-              <th>Service Date</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Issue</th><th>Photos</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="serviceBody"></tbody>
-        </table>
-        <div id="serviceEmpty" class="empty-state" style="display:none">
-          <div class="empty-icon">🔧</div>
-          <p>No service orders yet.</p>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-</div><!-- /main -->
-
-<!-- NOTIFICATION PANEL -->
-<div class="notif-panel" id="notifPanel">
-  <div class="notif-panel-header">
-    <h3>Notifications</h3>
-    <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
-  </div>
-  <div id="notifList"></div>
+  <!-- TABLE -->
+  <div class="table-wrap"><table><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
 </div>
-
-<!-- ===== ORDER FORM MODAL ===== -->
-<div class="overlay" id="orderModal">
-  <div class="modal modal-lg">
-    <div class="modal-header">
-      <h2 id="orderModalTitle">New Back Order</h2>
-      <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-grid three">
-        <div class="form-group">
-          <label>Job Code *</label>
-          <input type="number" id="f_jobCode" placeholder="e.g. 1129">
-        </div>
-        <div class="form-group">
-          <label>Work Order # *</label>
-          <input type="number" id="f_workOrder" placeholder="e.g. 31472">
-        </div>
-        <div class="form-group">
-          <label>Product Type</label>
-          <input type="text" id="f_product" placeholder="e.g. Door Sash, Window Unit">
-        </div>
-        <div class="form-group form-col-full">
-          <label>Project Name *</label>
-          <input type="text" id="f_projectName" placeholder="e.g. King 4th Avenue W">
-        </div>
-        <div class="form-group">
-          <label>Floor / Location</label>
-          <input type="text" id="f_floor" placeholder="e.g. 10-15 Sash">
-        </div>
-        <div class="form-group">
-          <label>Window / Door #</label>
-          <input type="text" id="f_windowDoorNum" placeholder="e.g. 10/18.D">
-        </div>
-        <div class="form-group">
-          <label>Due Date *</label>
-          <input type="date" id="f_dueDate">
-        </div>
-        <div class="form-group">
-          <label>Priority</label>
-          <select id="f_priority">
-            <option>Normal</option><option>Urgent</option><option>On Hold</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select id="f_status">
-            <option>Pending</option><option>In-Progress</option><option>On-Hold</option><option>Completed</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Assigned To</label>
-          <select id="f_assignee">
-            <option>Abhay</option><option>Firas</option><option>Derek M.</option>
-            <option>James T.</option><option>Carlos R.</option><option>Sara K.</option><option>Mike P.</option>
-          </select>
-        </div>
-        <div class="form-group form-col-full">
-          <label>Reason for Back Order *</label>
-          <textarea id="f_reason" placeholder="Describe the reason for the back order…"></textarea>
-        </div>
-        <div class="form-group form-col-full">
-          <label>Notes</label>
-          <textarea id="f_notes" placeholder="Additional notes, follow-up actions, supplier info…" style="min-height:60px"></textarea>
-        </div>
-
-        <div class="form-section">📎 Photo / Document Attachments</div>
-        <div class="form-col-full">
-          <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()" id="uploadArea">
-            <div class="upload-icon">📷</div>
-            <p><strong>Click to upload</strong> or drag & drop</p>
-            <p>Images, PDFs, Word docs — any file type accepted</p>
-          </div>
-          <input type="file" id="photoInput" multiple accept="*/*" style="display:none" onchange="handlePhotoUpload(event)">
-          <div class="photo-gallery" id="photoGallery"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="emailOrder()">✉ Email Order</button>
-      <button class="btn btn-secondary" onclick="closeModal('orderModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveOrder()">💾 Save Order</button>
+<!-- FAB -->
+<button class="fab" onclick="openModal()" title="New Order">+</button>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title">New Back Order</div>
+    <div class="form-grid" id="modal-form"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="email-btn" onclick="emailOrder()" style="margin-right:auto">✉ Email</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Save</button>
     </div>
   </div>
 </div>
-
-<!-- ===== ORDER DETAIL MODAL ===== -->
-<div class="overlay" id="detailModal">
-  <div class="modal modal-lg">
-    <div class="modal-header">
-      <h2 id="detailTitle">Order Details</h2>
-      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
-    </div>
-    <div class="modal-body" id="detailBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" id="detailEditBtn">✏ Edit</button>
-      <button class="btn btn-primary" onclick="closeModal('detailModal')">Close</button>
+<!-- WEEKLY REPORT MODAL -->
+<div class="modal-overlay" id="report-modal" onclick="if(event.target===this)closeReportModal()">
+  <div class="report-content" onclick="event.stopPropagation()">
+    <div class="modal-title">📊 Weekly Report</div>
+    <div id="report-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="emailWeeklyReport()">✉ Email to Manager</button>
+      <button class="btn btn-outline" onclick="manualSync()" title="Refresh from cloud">☁ Sync Now</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+      <button class="btn btn-primary" onclick="closeReportModal()">Close</button>
     </div>
   </div>
 </div>
-
-<!-- ===== REPORT MODAL ===== -->
-<div class="overlay" id="reportModal">
-  <div class="modal modal-lg">
-    <div class="modal-header">
-      <h2>📊 Weekly Report</h2>
-      <button class="modal-close" onclick="closeModal('reportModal')">✕</button>
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="sync-modal" onclick="if(event.target===this)closeSyncModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+    <div class="modal-title">☁️ Sync Across Devices</div>
+    <div style="font-size:0.85rem;line-height:1.6;color:var(--ink);margin-bottom:16px">
+      <p style="margin-bottom:10px"><strong>To use the same data on another device:</strong></p>
+      <ol style="margin-left:20px;line-height:1.8">
+        <li><strong>Export</strong> your data here as a backup file</li>
+        <li>Open the dashboard on another phone or computer</li>
+        <li><strong>Import</strong> the backup file there</li>
+      </ol>
+      <p style="margin-top:12px;color:var(--muted);font-size:0.78rem">💡 Tip: Save the backup file in a shared cloud folder (Dropbox, Google Drive, OneDrive) so the team can always pull the latest copy.</p>
     </div>
-    <div class="modal-body" id="reportBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="emailReport()">✉ Email to Manager</button>
-      <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
-      <button class="btn btn-primary" onclick="closeModal('reportModal')">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== SYNC MODAL ===== -->
-<div class="overlay" id="syncModal">
-  <div class="modal modal-sm">
-    <div class="modal-header">
-      <h2>☁️ Cloud Sync Setup</h2>
-      <button class="modal-close" onclick="closeModal('syncModal')">✕</button>
-    </div>
-    <div class="modal-body" id="syncBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="exportBackup()">⬇ Export Backup</button>
-      <label class="btn btn-secondary" style="cursor:pointer">⬆ Import Backup<input type="file" accept=".json" style="display:none" onchange="importBackup(event)"></label>
-      <button class="btn btn-primary" onclick="saveSyncSettings()">Save & Sync</button>
+    <div class="modal-actions">
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">⬆ Import Backup</button>
+      <button class="btn btn-primary" onclick="exportBackup()">⬇ Export Backup</button>
+      <button class="btn btn-outline" onclick="closeSyncModal()">Close</button>
     </div>
   </div>
 </div>
-
-<!-- ===== PHOTO VIEWER ===== -->
-<div class="overlay" id="photoViewer" onclick="closeModal('photoViewer')">
-  <div style="max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center;">
-    <img id="photoViewerImg" src="" style="max-width:100%;max-height:85vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+<!-- NOTIF DROPDOWN -->
+<div class="notif-dropdown" id="notif-dropdown">
+  <div class="notif-dropdown-header">
+    Notifications
+    <button onclick="markAllNotifsRead()">Mark all read</button>
   </div>
+  <div class="notif-dropdown-list" id="notif-dropdown-list"></div>
 </div>
-
+<div id="notification-area"></div>
+<div class="autosave-indicator" id="autosave-ind">✓ Saved</div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src="" alt=""></div>
 <script>
-// ═══════════════════════════════════════════
-// CONFIG & CONSTANTS
-// ═══════════════════════════════════════════
-const APP_KEY = 'bvg_order_tracker_v6';
+// ─── CONFIG ─────────────────────────────────────────────
+const PRODUCTS    = ['Window Frames','Sliding Doors','Lift-&-Slide Doors','Door Sashes','Screens'];
+const PRIORITIES  = ['Urgent','Normal','On Hold'];
+const STATUSES    = ['Pending','In-Progress','Completed','On-Hold'];
+const ISSUE_TYPES = ['Installation Issue','Damaged on Delivery','Missing Parts','Warranty Repair','Measurement Error','Hardware Defect'];
+const TEAM        = ['Abhay','Firas','Derek M.','James T.','Carlos R.','Sara K.','Mike P.'];
+const PRIORITY_WEIGHT = { Urgent:0, Normal:1, 'On Hold':2 };
+const STORAGE_KEY = 'bvg_order_tracker_v5';
+const USER_KEY = 'bvg_current_user';
 const CLOUD_URL = 'https://script.google.com/macros/s/AKfycby75t3rKG5TzQz020YxqLZk-_5afSyoewgc7YgjJu5v9pUi1fGkkRbfph0V3KaCCHSN/exec';
-const USERS = ['Abhay','Firas','Derek M.','James T.','Carlos R.','Sara K.','Mike P.'];
-const AVATAR_COLORS = ['#2563eb','#7c3aed','#0891b2','#059669','#dc2626','#d97706','#9333ea'];
-
-let currentUser = 'Abhay';
-let currentTab = 'back';
+let cloudSyncEnabled = true;
+let lastCloudSync = null;
+let pendingCloudSave = false;
+// Avatar colors per user
+const USER_COLORS = { 'Abhay':'#c8410a','Firas':'#2b6cb0','Derek M.':'#276749','James T.':'#b7791f','Carlos R.':'#7c3aed','Sara K.':'#db2777','Mike P.':'#0891b2' };
+let activeTab = 'backorders';
 let editingId = null;
-let pendingPhotos = []; // {id, name, type, data (base64)}
-let sortField = 'dueDate';
-let sortDir = 1;
-let syncInterval = null;
-
-// ═══════════════════════════════════════════
-// SAMPLE DATA
-// ═══════════════════════════════════════════
-const SAMPLE_BACK_ORDERS = [
-  {id:'BO-1001',jobCode:1129,workOrder:31472,projectName:'King 4th Avenue W',floor:'10-15 Sash',windowDoorNum:'10/18.D',product:'Door Sashes',dueDate:'2026-04-28',priority:'Urgent',status:'Pending',assignee:'Abhay',reason:'Damaged during assembly — frame bent on left side',notes:'Replacement ordered from supplier. Follow up Monday.',photos:[],comments:[{user:'Abhay',text:'Contacted supplier, replacement on order',at:'2026-05-02T09:00:00Z'}],activity:[{text:'Order created',at:'2026-04-29T08:00:00Z'},{text:'Status → Pending',at:'2026-04-29T08:00:00Z'}],createdAt:'2026-04-29'},
-  {id:'BO-1002',jobCode:1145,workOrder:31501,projectName:'Canderel Markham',floor:'4',windowDoorNum:'4A/7B.D',product:'Fixed Glazing',dueDate:'2026-05-03',priority:'Normal',status:'In-Progress',assignee:'Firas',reason:'Wrong colour ordered — should be Dark Bronze, received Black Anodized',notes:'Colour sample sent to PM for approval before reorder.',photos:[],comments:[],activity:[{text:'Order created',at:'2026-05-01T10:30:00Z'},{text:'Status → In-Progress',at:'2026-05-02T14:00:00Z'}],createdAt:'2026-05-01'},
-  {id:'BO-1003',jobCode:1156,workOrder:31523,projectName:'2150 Lake Shore Blvd',floor:'12',windowDoorNum:'12/03.W',product:'Curtain Wall Panel',dueDate:'2026-05-06',priority:'Urgent',status:'Pending',assignee:'Derek M.',reason:'Broken glass during transit — corner impact damage',notes:'Insurance claim filed. Replacement ETA 7 business days.',photos:[],comments:[{user:'Derek M.',text:'Sent photos to logistics team for insurance claim',at:'2026-05-03T11:00:00Z'}],activity:[{text:'Order created',at:'2026-05-02T07:45:00Z'}],createdAt:'2026-05-02'},
-  {id:'BO-1004',jobCode:1129,workOrder:31480,projectName:'King 4th Avenue W',floor:'8-9',windowDoorNum:'8/22.W',product:'Window Unit',dueDate:'2026-05-08',priority:'Normal',status:'In-Progress',assignee:'Abhay',reason:'Missing hardware package — hinges and screws not included',notes:'Hardware reordered. Arriving Thursday.',photos:[],comments:[],activity:[{text:'Order created',at:'2026-05-01T08:00:00Z'}],createdAt:'2026-05-01'},
-  {id:'BO-1005',jobCode:1167,workOrder:31544,projectName:'Yonge & Eglinton Centre',floor:'22',windowDoorNum:'22/11.W',product:'Storefront Frame',dueDate:'2026-05-01',priority:'Urgent',status:'On-Hold',assignee:'James T.',reason:'Incorrect measurements — fabricated to old drawing revision',notes:'Awaiting revised drawings from design team. On hold pending approval.',photos:[],comments:[{user:'James T.',text:'Design team sent Rev C drawings. Reviewing now.',at:'2026-05-04T13:00:00Z'}],activity:[{text:'Order created',at:'2026-04-30T09:00:00Z'},{text:'Status → On-Hold',at:'2026-05-01T16:00:00Z'}],createdAt:'2026-04-30'},
-  {id:'BO-1006',jobCode:1178,workOrder:31567,projectName:'400 King Street West',floor:'3',windowDoorNum:'3/05.D',product:'Entry Door',dueDate:'2026-05-12',priority:'Normal',status:'Pending',assignee:'Carlos R.',reason:'Supplier delay — strike-off sample rejected, revision required',notes:'New strike-off expected May 8. Will confirm with PM.',photos:[],comments:[],activity:[{text:'Order created',at:'2026-05-02T10:00:00Z'}],createdAt:'2026-05-02'},
-  {id:'BO-1007',jobCode:1145,workOrder:31502,projectName:'Canderel Markham',floor:'7',windowDoorNum:'7C/9.W',product:'Operable Window',dueDate:'2026-05-09',priority:'Normal',status:'Pending',assignee:'Firas',reason:'Surface defect — deep scratch on exterior face of frame',notes:'QC inspection report attached. Supplier to replace.',photos:[],comments:[],activity:[{text:'Order created',at:'2026-05-03T09:30:00Z'}],createdAt:'2026-05-03'},
-  {id:'BO-1008',jobCode:1156,workOrder:31524,projectName:'2150 Lake Shore Blvd',floor:'5',windowDoorNum:'5/14.W',product:'Fixed Window',dueDate:'2026-05-05',priority:'Urgent',status:'In-Progress',assignee:'Sara K.',reason:'Damaged in transit — frame twisted, not square',notes:'Replacement panel fabricated and en route. Expected delivery May 6.',photos:[],comments:[{user:'Sara K.',text:'Replacement confirmed shipped, tracking #TRK-8842',at:'2026-05-04T08:00:00Z'}],activity:[{text:'Order created',at:'2026-05-02T12:00:00Z'},{text:'Status → In-Progress',at:'2026-05-03T09:00:00Z'}],createdAt:'2026-05-02'},
-  {id:'BO-1009',jobCode:1167,workOrder:31545,projectName:'Yonge & Eglinton Centre',floor:'18',windowDoorNum:'18/02.W',product:'Window Unit',dueDate:'2026-05-11',priority:'Normal',status:'On-Hold',assignee:'Mike P.',reason:'Wrong profile specified — RU80 ordered, site requires RU100',notes:'PM reviewing profile change impact on surrounding frames.',photos:[],comments:[],activity:[{text:'Order created',at:'2026-05-03T14:00:00Z'},{text:'Status → On-Hold',at:'2026-05-04T10:00:00Z'}],createdAt:'2026-05-03'},
-  {id:'BO-1010',jobCode:1178,workOrder:31568,projectName:'400 King Street West',floor:'6',windowDoorNum:'6/08.D',product:'Sliding Door',dueDate:'2026-04-22',priority:'Normal',status:'Completed',assignee:'Carlos R.',reason:'Faulty locking mechanism — latch not engaging properly',notes:'New latch installed and tested on site. Resolved.',photos:[],comments:[{user:'Carlos R.',text:'Installed and tested. All good!',at:'2026-04-25T16:00:00Z'}],activity:[{text:'Order created',at:'2026-04-20T08:00:00Z'},{text:'Status → Completed',at:'2026-04-25T16:00:00Z'}],createdAt:'2026-04-20'},
+let currentUser = 'Abhay';
+let currentPhotos = [];
+let currentComments = [];
+let currentActivity = [];
+let notifications = [];
+let quickFilter = 'all';
+// ─── DEFAULT SEED DATA ──────────────────────────────────
+const DEFAULT_BO = [
+  { id:'BO-1041', jobCode:'1074', workOrder:'WO-4421', projectName:'Maple Ridge Phase 2',  floor:'3rd Floor', windowDoorNum:'W-14, W-15',   product:'Sliding Doors',      dueDate:'2026-04-28', priority:'Urgent',  status:'Pending',     assignee:'Abhay',    reason:'Glass delayed from supplier', photos:[], comments:[], activity:[], createdAt:'2026-04-15' },
+  { id:'BO-1042', jobCode:'1085', workOrder:'WO-4435', projectName:'Northview Tower',       floor:'7th Floor', windowDoorNum:'W-02 to W-10', product:'Window Frames',      dueDate:'2026-05-03', priority:'Normal',  status:'In-Progress', assignee:'Derek M.', reason:'Combi machine backlog',       photos:[], comments:[], activity:[], createdAt:'2026-04-20' },
+  { id:'BO-1043', jobCode:'1091', workOrder:'WO-4448', projectName:'Sunrise Condo Block A', floor:'1st Floor', windowDoorNum:'D-01, D-02',   product:'Lift-&-Slide Doors', dueDate:'2026-05-08', priority:'Normal',  status:'Pending',     assignee:'James T.', reason:'Awaiting hardware kit',       photos:[], comments:[], activity:[], createdAt:'2026-04-22' },
+  { id:'BO-1044', jobCode:'1063', workOrder:'WO-4452', projectName:'GreenBuild HQ',         floor:'Lobby',     windowDoorNum:'S-01 to S-06', product:'Screens',            dueDate:'2026-04-25', priority:'Urgent',  status:'On-Hold',     assignee:'Sara K.',  reason:'Client requested design change', photos:[], comments:[], activity:[], createdAt:'2026-04-10' },
+  { id:'BO-1045', jobCode:'1058', workOrder:'WO-4460', projectName:'TerraHomes Unit 5',     floor:'2nd Floor', windowDoorNum:'D-05, D-06',   product:'Door Sashes',        dueDate:'2026-05-12', priority:'Normal',  status:'Completed',   assignee:'Carlos R.',reason:'Resolved',                    photos:[], comments:[], activity:[], createdAt:'2026-04-18', completedAt:'2026-04-30' },
+  { id:'BO-1046', jobCode:'1102', workOrder:'WO-4471', projectName:'Lakeside Residences',   floor:'5th Floor', windowDoorNum:'W-22 to W-28', product:'Window Frames',      dueDate:'2026-05-15', priority:'On Hold', status:'In-Progress', assignee:'Abhay',    reason:'Waiting on client approval',  photos:[], comments:[], activity:[], createdAt:'2026-04-25' },
+  { id:'BO-1047', jobCode:'1117', workOrder:'WO-4485', projectName:'PineCrest Mall',        floor:'Ground',    windowDoorNum:'S-10 to S-18', product:'Screens',            dueDate:'2026-05-20', priority:'Normal',  status:'Pending',     assignee:'Mike P.',  reason:'Material on order',           photos:[], comments:[], activity:[], createdAt:'2026-04-26' },
 ];
-
-const SAMPLE_SERVICE_ORDERS = [
-  {id:'SO-1001',jobCode:1129,workOrder:31472,projectName:'King 4th Avenue W',floor:'10',windowDoorNum:'10/5.W',product:'Fixed Window',serviceDate:'2026-05-07',priority:'Urgent',status:'Pending',assignee:'Abhay',reason:'Seal failure — fogging between glass panes',notes:'Unit under warranty. Glazing unit replacement required.',photos:[],comments:[],activity:[{text:'Service order created',at:'2026-05-04T09:00:00Z'}],createdAt:'2026-05-04'},
-  {id:'SO-1002',jobCode:1145,workOrder:31501,projectName:'Canderel Markham',floor:'4',windowDoorNum:'4A/3.D',product:'Door',serviceDate:'2026-05-10',priority:'Normal',status:'In-Progress',assignee:'Firas',reason:'Hardware adjustment — door closer not engaging at end of travel',notes:'Closer tension adjusted. Follow-up visit scheduled.',photos:[],comments:[{user:'Firas',text:'Adjusted arm tension. Client to test over weekend.',at:'2026-05-03T15:00:00Z'}],activity:[{text:'Service order created',at:'2026-05-02T11:00:00Z'}],createdAt:'2026-05-02'},
-  {id:'SO-1003',jobCode:1156,workOrder:31523,projectName:'2150 Lake Shore Blvd',floor:'2',windowDoorNum:'2/7.W',product:'Window',serviceDate:'2026-05-13',priority:'Normal',status:'Pending',assignee:'Derek M.',reason:'Water infiltration around frame — sealant failure at sill',notes:'Re-sealing required. Scaffolding access to be arranged.',photos:[],comments:[],activity:[{text:'Service order created',at:'2026-05-03T13:00:00Z'}],createdAt:'2026-05-03'},
-  {id:'SO-1004',jobCode:1167,workOrder:31544,projectName:'Yonge & Eglinton Centre',floor:'15',windowDoorNum:'15/1.W',product:'Operable Window',serviceDate:'2026-05-15',priority:'Normal',status:'Pending',assignee:'James T.',reason:'Draft issue — weatherstrip worn, cold air infiltration reported by tenant',notes:'Weatherstrip replacement kit ordered.',photos:[],comments:[],activity:[{text:'Service order created',at:'2026-05-04T10:00:00Z'}],createdAt:'2026-05-04'},
+const DEFAULT_SO = [
+  { id:'SO-881', jobCode:'1074', client:'Maple Ridge Homes',     issueType:'Installation Issue',  technician:'Derek M.',  priority:'Urgent',  status:'Pending',     dueDate:'2026-04-30', assignee:'Derek M.', notes:'Wrong frame size installed, needs rework', photos:[], comments:[], activity:[], createdAt:'2026-04-25' },
+  { id:'SO-882', jobCode:'1085', client:'Northview Construction',issueType:'Missing Parts',       technician:'James T.',  priority:'Normal',  status:'In-Progress', dueDate:'2026-05-05', assignee:'James T.', notes:'Track rollers missing from delivery',     photos:[], comments:[], activity:[], createdAt:'2026-04-26' },
+  { id:'SO-883', jobCode:'1091', client:'Sunrise Builds',        issueType:'Damaged on Delivery', technician:'Carlos R.', priority:'Urgent',  status:'Pending',     dueDate:'2026-04-29', assignee:'Carlos R.',notes:'Corner bead cracked on 3 frames',         photos:[], comments:[], activity:[], createdAt:'2026-04-24' },
+  { id:'SO-884', jobCode:'1063', client:'GreenBuild Inc.',       issueType:'Warranty Repair',     technician:'Derek M.',  priority:'Normal',  status:'Completed',   dueDate:'2026-04-22', assignee:'Derek M.', notes:'Seal replacement done',                   photos:[], comments:[], activity:[], createdAt:'2026-04-15', completedAt:'2026-04-22' },
+  { id:'SO-885', jobCode:'1058', client:'TerraHomes',            issueType:'Hardware Defect',     technician:'James T.',  priority:'On Hold', status:'On-Hold',     dueDate:'2026-05-10', assignee:'James T.', notes:'Waiting for replacement locking mechanism', photos:[], comments:[], activity:[], createdAt:'2026-04-28' },
+  { id:'SO-886', jobCode:'1117', client:'Lakeside Dev.',         issueType:'Measurement Error',   technician:'Carlos R.', priority:'Normal',  status:'Pending',     dueDate:'2026-05-07', assignee:'Carlos R.',notes:'Frame width off by 8mm, remake required', photos:[], comments:[], activity:[], createdAt:'2026-04-29' },
 ];
-
-// ═══════════════════════════════════════════
-// DATA LAYER
-// ═══════════════════════════════════════════
+let backOrders = [];
+let serviceOrders = [];
+// ─── PERSISTENCE ─────────────────────────────────────────
 function loadData() {
   try {
-    const raw = localStorage.getItem(APP_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  // Migrate from v5
-  try {
-    const v5 = localStorage.getItem('bvg_order_tracker_v5');
-    if (v5) {
-      const old = JSON.parse(v5);
-      const data = freshData();
-      if (old.backOrders) {
-        old.backOrders.forEach(o => {
-          data.backOrders.push({...o, photos: o.photos||[], comments: o.comments||[], activity: o.activity||[], notes: o.notes||''});
-        });
-      }
-      saveDataObj(data);
-      return data;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const p = JSON.parse(saved);
+      backOrders = p.backOrders || [];
+      serviceOrders = p.serviceOrders || [];
+      notifications = p.notifications || [];
+      return true;
     }
-  } catch(e) {}
-  const data = freshData();
-  data.backOrders = SAMPLE_BACK_ORDERS.map(o => ({...o}));
-  data.serviceOrders = SAMPLE_SERVICE_ORDERS.map(o => ({...o}));
-  saveDataObj(data);
-  return data;
+  } catch(e) { console.error(e); }
+  return false;
 }
-
-function freshData() {
-  return { backOrders: [], serviceOrders: [], notifications: [], cloudKey: '', cloudBin: '', savedAt: null };
+// ─── CLOUD SYNC (Google Sheets) ─────────────────────────
+async function cloudLoad() {
+  if (!cloudSyncEnabled || !CLOUD_URL) return false;
+  try {
+    showCloudStatus('Loading from cloud...', 'loading');
+    const res = await fetch(CLOUD_URL);
+    const data = await res.json();
+    if (data.orders) {
+      const newBO = [];
+      const newSO = [];
+      data.orders.forEach(o => {
+        // Reconstruct full order from flat sheet row
+        const reconstructed = {
+          id: o.id || '',
+          jobCode: o.jobCode || '',
+          workOrder: o.workOrder || '',
+          projectName: o.projectName || '',
+          floor: o.floor || '',
+          windowDoorNum: o.windowDoorNum || '',
+          product: o.product || '',
+          dueDate: o.dueDate ? formatDateFromSheet(o.dueDate) : '',
+          priority: o.priority || 'Normal',
+          status: o.status || 'Pending',
+          assignee: o.assignee || '',
+          reason: o.reason || '',
+          // Keep local fields if order existed
+          photos: [], comments: [], activity: [], createdAt: ''
+        };
+        // Try to preserve local-only fields by matching id
+        const existingBO = backOrders.find(x => x.id === reconstructed.id);
+        const existingSO = serviceOrders.find(x => x.id === reconstructed.id);
+        const existing = existingBO || existingSO;
+        if (existing) {
+          reconstructed.photos = existing.photos || [];
+          reconstructed.comments = existing.comments || [];
+          reconstructed.activity = existing.activity || [];
+          reconstructed.createdAt = existing.createdAt || '';
+          reconstructed.completedAt = existing.completedAt;
+          if (!reconstructed.completedAt && reconstructed.status === 'Completed') reconstructed.completedAt = new Date().toISOString();
+        } else if (reconstructed.status === 'Completed') {
+          reconstructed.completedAt = new Date().toISOString();
+        }
+        if (!reconstructed.createdAt) reconstructed.createdAt = new Date().toISOString().slice(0,10);
+        
+        if (o.type === 'service' || (reconstructed.id && reconstructed.id.startsWith('SO'))) {
+          // Map back-order fields to service-order fields where applicable
+          reconstructed.client = reconstructed.projectName;
+          reconstructed.issueType = reconstructed.product || 'Installation Issue';
+          reconstructed.technician = reconstructed.assignee;
+          reconstructed.notes = reconstructed.reason;
+          newSO.push(reconstructed);
+        } else {
+          newBO.push(reconstructed);
+        }
+      });
+      backOrders = newBO;
+      serviceOrders = newSO;
+      lastCloudSync = new Date();
+      showCloudStatus('✓ Synced just now', 'success');
+      return true;
+    }
+  } catch(e) {
+    console.error('Cloud load failed:', e);
+    showCloudStatus('⚠ Offline mode', 'error');
+  }
+  return false;
 }
-
-function getData() { return window._appData || (window._appData = loadData()); }
-
-function saveDataObj(d) {
-  d.savedAt = new Date().toISOString();
-  localStorage.setItem(APP_KEY, JSON.stringify(d));
-  window._appData = d;
+async function cloudSave() {
+  if (!cloudSyncEnabled || !CLOUD_URL) return;
+  if (pendingCloudSave) return;
+  pendingCloudSave = true;
+  try {
+    showCloudStatus('Saving to cloud...', 'loading');
+    // Combine both lists into a single flat list with type marker
+    const allOrders = [
+      ...backOrders.map(o => ({ ...flattenOrder(o), type: 'back' })),
+      ...serviceOrders.map(o => ({ ...flattenOrder(o), type: 'service' }))
+    ];
+    await fetch(CLOUD_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action: 'saveAll', orders: allOrders })
+    });
+    lastCloudSync = new Date();
+    showCloudStatus('✓ Saved to cloud', 'success');
+  } catch(e) {
+    console.error('Cloud save failed:', e);
+    showCloudStatus('⚠ Save failed', 'error');
+  } finally {
+    pendingCloudSave = false;
+  }
 }
-
-function save() { saveDataObj(getData()); }
-
-function getNextId(prefix, arr) {
-  const nums = arr.map(o => parseInt((o.id||'').replace(prefix+'-',''))).filter(n => !isNaN(n));
-  const next = nums.length ? Math.max(...nums) + 1 : 1001;
-  return `${prefix}-${next}`;
+function flattenOrder(o) {
+  // For service orders, map their fields to common columns
+  return {
+    id: o.id || '',
+    jobCode: o.jobCode || '',
+    workOrder: o.workOrder || '',
+    projectName: o.projectName || o.client || '',
+    floor: o.floor || '',
+    windowDoorNum: o.windowDoorNum || '',
+    product: o.product || o.issueType || '',
+    dueDate: o.dueDate || '',
+    priority: o.priority || '',
+    status: o.status || '',
+    assignee: o.assignee || o.technician || '',
+    reason: o.reason || o.notes || ''
+  };
 }
-
-// ═══════════════════════════════════════════
-// CLOCK
-// ═══════════════════════════════════════════
+function formatDateFromSheet(d) {
+  if (!d) return '';
+  if (typeof d === 'string' && d.match(/^\d{4}-\d{2}-\d{2}/)) return d.slice(0,10);
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return dt.toISOString().slice(0,10);
+  } catch(e) { return d; }
+}
+function showCloudStatus(msg, type) {
+  let el = document.getElementById('cloud-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'cloud-status';
+    el.style.cssText = 'position:fixed;bottom:20px;left:20px;padding:6px 14px;border-radius:20px;font-size:0.7rem;font-family:IBM Plex Mono,monospace;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:all 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  if (type === 'success') { el.style.background = 'var(--green)'; el.style.color = '#fff'; }
+  else if (type === 'loading') { el.style.background = 'var(--accent2)'; el.style.color = '#fff'; }
+  else if (type === 'error') { el.style.background = 'var(--urgent)'; el.style.color = '#fff'; }
+  el.style.opacity = '1';
+  clearTimeout(showCloudStatus._t);
+  showCloudStatus._t = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+// Manual sync button
+async function manualSync() {
+  await cloudSave();
+  await cloudLoad();
+  saveData();
+  renderAll();
+  pushNotification('☁️ Synced', 'Data refreshed from cloud.', 'success');
+}
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ backOrders, serviceOrders, notifications, savedAt:new Date().toISOString() }));
+    showAutosave();
+    // Debounced cloud sync
+    clearTimeout(saveData._cloudTimer);
+    saveData._cloudTimer = setTimeout(cloudSave, 1500);
+  } catch(e) { alert('Save failed - storage may be full.'); }
+}
+function showAutosave() {
+  const ind = document.getElementById('autosave-ind');
+  ind.classList.add('show');
+  clearTimeout(showAutosave._t);
+  showAutosave._t = setTimeout(() => ind.classList.remove('show'), 1400);
+}
+// ─── USER ────────────────────────────────────────────────
+function loadUser() {
+  currentUser = localStorage.getItem(USER_KEY) || 'Abhay';
+  const sel = document.getElementById('user-select');
+  sel.innerHTML = TEAM.map(t => `<option ${t===currentUser?'selected':''}>${t}</option>`).join('');
+}
+function changeUser() {
+  currentUser = document.getElementById('user-select').value;
+  localStorage.setItem(USER_KEY, currentUser);
+  pushNotification('Welcome', `Logged in as ${currentUser}`, 'success');
+  renderAll();
+}
+// ─── CLOCK + DAILY SUMMARY ──────────────────────────────
 function updateClock() {
   const now = new Date();
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const h = now.getHours(), m = String(now.getMinutes()).padStart(2,'0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h % 12 || 12;
-  document.getElementById('clockDisplay').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()} · ${h12}:${m} ${ampm}`;
+  document.getElementById('hclock').textContent = now.toLocaleTimeString('en-US', { hour12:true, hour:'numeric', minute:'2-digit' });
+  document.getElementById('hdate').textContent = now.toLocaleDateString('en-CA', { weekday:'short', month:'short', day:'numeric' });
 }
-
-// ═══════════════════════════════════════════
-// AVATAR
-// ═══════════════════════════════════════════
-function avatarColor(name) {
-  let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[h];
-}
-function avatarHtml(name) {
-  const initials = name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2);
-  return `<span class="avatar" style="background:${avatarColor(name)}" title="${name}">${initials}</span>`;
-}
-
-// ═══════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════
-function showTab(tab) {
-  currentTab = tab;
-  document.getElementById('section-back').style.display = tab === 'back' ? '' : 'none';
-  document.getElementById('section-service').style.display = tab === 'service' ? '' : 'none';
-  document.getElementById('pageTitle').textContent = tab === 'back' ? 'Back Orders' : 'Service Orders';
-  document.getElementById('newOrderBtn').textContent = tab === 'back' ? '+ New Order' : '+ New Service Order';
-  ['back','service','report','sync'].forEach(t => {
-    const el = document.getElementById(`nav-${t}`);
-    if (el) el.classList.toggle('active', t === tab);
-  });
-  closeMobileMenu();
-  if (tab === 'service') renderServiceTable();
-}
-
-// ═══════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════
-function renderStats() {
-  const d = getData();
-  const orders = d.backOrders.filter(o => o.status !== 'Completed');
-  const now = new Date(); now.setHours(0,0,0,0);
-  const overdue = orders.filter(o => o.dueDate && new Date(o.dueDate) < now).length;
-  const urgent = orders.filter(o => o.priority === 'Urgent').length;
-  const active = orders.filter(o => o.status === 'In-Progress').length;
-  const hold = orders.filter(o => o.status === 'On-Hold').length;
-  const done = d.backOrders.filter(o => o.status === 'Completed').length;
-  document.getElementById('statOverdue').textContent = overdue;
-  document.getElementById('statUrgent').textContent = urgent;
-  document.getElementById('statActive').textContent = active;
-  document.getElementById('statHold').textContent = hold;
-  document.getElementById('statDone').textContent = done;
-
-  // Welcome bar
+function getGreeting() {
   const h = new Date().getHours();
-  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('welcomeMsg').textContent = `${greeting}, ${currentUser} 👋`;
-  const open = orders.length;
-  document.getElementById('welcomeSub').textContent = `You have ${open} open order${open !== 1 ? 's' : ''} that need${open === 1 ? 's' : ''} attention.`;
-  const chip = document.getElementById('overdueChip');
-  chip.innerHTML = overdue > 0 ? `<span class="alert-chip">⚠ ${overdue} overdue</span>` : '';
+  return h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
 }
-
-// ═══════════════════════════════════════════
-// FILTERS
-// ═══════════════════════════════════════════
-function filterByStatus(s) {
-  if (s === 'overdue') {
-    document.getElementById('filterStatus').value = '';
-    document.getElementById('filterPriority').value = '';
-  } else {
-    document.getElementById('filterStatus').value = s;
-  }
-  showTab('back');
-  renderTable();
+function isEndOfDay() {
+  const h = new Date().getHours();
+  return h >= 16 && h < 18;
 }
-function filterByPriority(p) {
-  document.getElementById('filterPriority').value = p;
-  showTab('back');
-  renderTable();
-}
-
-// ═══════════════════════════════════════════
-// SORT
-// ═══════════════════════════════════════════
-function sortBy(field) {
-  if (sortField === field) sortDir *= -1; else { sortField = field; sortDir = 1; }
-  renderTable();
-}
-
-// ═══════════════════════════════════════════
-// RENDER BACK ORDERS TABLE
-// ═══════════════════════════════════════════
-function renderTable() {
-  const d = getData();
-  const search = (document.getElementById('searchBox').value || '').toLowerCase();
-  const pri = document.getElementById('filterPriority').value;
-  const sta = document.getElementById('filterStatus').value;
-  const asgn = document.getElementById('filterAssignee').value;
-  const view = document.getElementById('filterView').value;
-  const now = new Date(); now.setHours(0,0,0,0);
-
-  let orders = d.backOrders.filter(o => {
-    if (search && !JSON.stringify(o).toLowerCase().includes(search)) return false;
-    if (pri && o.priority !== pri) return false;
-    if (sta && o.status !== sta) return false;
-    if (asgn && o.assignee !== asgn) return false;
-    if (view === 'mine' && o.assignee !== currentUser) return false;
-    return true;
-  });
-
-  orders.sort((a,b) => {
-    let av = a[sortField] || '', bv = b[sortField] || '';
-    if (sortField === 'dueDate') { av = new Date(av); bv = new Date(bv); }
-    return av < bv ? -sortDir : av > bv ? sortDir : 0;
-  });
-
-  const tbody = document.getElementById('ordersBody');
-  tbody.innerHTML = '';
-  document.getElementById('ordersEmpty').style.display = orders.length ? 'none' : 'block';
-
-  orders.forEach(o => {
-    const due = o.dueDate ? new Date(o.dueDate) : null;
-    const isOd = due && due < now && o.status !== 'Completed';
-    const odDays = isOd ? Math.round((now - due) / 86400000) : 0;
-    const tr = document.createElement('tr');
-    if (isOd) tr.className = 'overdue-row';
-    tr.innerHTML = `
-      <td><strong>${o.id}</strong></td>
-      <td class="job-code">${o.jobCode||'—'}</td>
-      <td class="job-code">${o.workOrder||'—'}</td>
-      <td class="project">${o.projectName}<div class="sub-text">${o.product||''}</div></td>
-      <td><div>${o.floor||'—'}</div><div class="sub-text text-muted">${o.windowDoorNum||''}</div></td>
-      <td class="due-cell ${isOd?'overdue':''}">
-        ${o.dueDate ? formatDate(o.dueDate) : '—'}
-        ${isOd ? `<span class="overdue-tag">${odDays}d overdue</span>` : ''}
-      </td>
-      <td>${priorityBadge(o.priority)}</td>
-      <td>${statusBadge(o.status)}</td>
-      <td>${avatarHtml(o.assignee)} <span class="text-sm">${o.assignee}</span></td>
-      <td style="max-width:160px;white-space:normal;font-size:12px;color:var(--gray-600)">${o.reason||'—'}</td>
-      <td>${renderPhotoThumbs(o)}</td>
-      <td>
-        <div class="row-actions">
-          <button class="action-btn action-view" onclick="openDetail('${o.id}')">View</button>
-          ${o.status !== 'Completed' ? `<button class="action-btn action-done" onclick="markDone('${o.id}')">✓</button>` : ''}
-          <button class="action-btn action-edit" onclick="openEdit('${o.id}')">Edit</button>
-          <button class="action-btn action-del" onclick="deleteOrder('${o.id}')">✕</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderPhotoThumbs(o) {
-  if (!o.photos || !o.photos.length) return '<span class="text-muted text-sm">—</span>';
-  const imgs = o.photos.slice(0,3).map(p => {
-    if (p.type && p.type.startsWith('image/')) {
-      return `<img class="photo-thumb" src="${p.data}" onclick="viewPhoto('${p.data}')" title="${p.name}">`;
-    }
-    return `<span class="photo-thumb" style="display:inline-flex;align-items:center;justify-content:center;font-size:16px" title="${p.name}">📎</span>`;
-  }).join('');
-  const extra = o.photos.length > 3 ? `<span class="photo-count">+${o.photos.length-3}</span>` : '';
-  return `<div class="photo-thumbs">${imgs}${extra}</div>`;
-}
-
-function priorityBadge(p) {
-  const cls = {Urgent:'badge-urgent',Normal:'badge-normal','On Hold':'badge-hold'}[p] || 'badge-normal';
-  return `<span class="badge ${cls}">${p||'Normal'}</span>`;
-}
-function statusBadge(s) {
-  const cls = {Pending:'badge-pending','In-Progress':'badge-inprogress',Completed:'badge-completed','On-Hold':'badge-onhold'}[s] || 'badge-pending';
-  return `<span class="badge ${cls}">${s||'Pending'}</span>`;
-}
-
-// ═══════════════════════════════════════════
-// RENDER SERVICE ORDERS TABLE
-// ═══════════════════════════════════════════
-function renderServiceTable() {
-  const d = getData();
-  const search = (document.getElementById('searchBoxSvc').value || '').toLowerCase();
-  const sta = document.getElementById('filterStatusSvc').value;
-  const asgn = document.getElementById('filterAssigneeSvc').value;
-
-  let orders = d.serviceOrders.filter(o => {
-    if (search && !JSON.stringify(o).toLowerCase().includes(search)) return false;
-    if (sta && o.status !== sta) return false;
-    if (asgn && o.assignee !== asgn) return false;
-    return true;
-  });
-
-  const tbody = document.getElementById('serviceBody');
-  tbody.innerHTML = '';
-  document.getElementById('serviceEmpty').style.display = orders.length ? 'none' : 'block';
-
-  orders.forEach(o => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${o.id}</strong></td>
-      <td class="job-code">${o.jobCode||'—'}</td>
-      <td class="project">${o.projectName}</td>
-      <td><div>${o.floor||'—'}</div><div class="sub-text text-muted">${o.windowDoorNum||''}</div></td>
-      <td>${o.serviceDate ? formatDate(o.serviceDate) : '—'}</td>
-      <td>${priorityBadge(o.priority)}</td>
-      <td>${statusBadge(o.status)}</td>
-      <td>${avatarHtml(o.assignee)} <span class="text-sm">${o.assignee}</span></td>
-      <td style="max-width:160px;white-space:normal;font-size:12px;color:var(--gray-600)">${o.reason||'—'}</td>
-      <td>${renderPhotoThumbs(o)}</td>
-      <td>
-        <div class="row-actions">
-          <button class="action-btn action-view" onclick="openDetailSvc('${o.id}')">View</button>
-          <button class="action-btn action-edit" onclick="openEditSvc('${o.id}')">Edit</button>
-          <button class="action-btn action-del" onclick="deleteSvcOrder('${o.id}')">✕</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-// ═══════════════════════════════════════════
-// NEW / EDIT ORDER
-// ═══════════════════════════════════════════
-function openNewOrder() {
-  editingId = null;
-  pendingPhotos = [];
-  document.getElementById('orderModalTitle').textContent = currentTab === 'service' ? 'New Service Order' : 'New Back Order';
-  clearForm();
-  document.getElementById('f_assignee').value = currentUser;
-  document.getElementById('f_dueDate').value = new Date(Date.now() + 7*86400000).toISOString().slice(0,10);
-  renderFormPhotos();
-  openModal('orderModal');
-}
-
-function openEdit(id) {
-  const d = getData();
-  const o = d.backOrders.find(x => x.id === id);
-  if (!o) return;
-  editingId = id;
-  pendingPhotos = (o.photos || []).map(p => ({...p}));
-  document.getElementById('orderModalTitle').textContent = `Edit Order — ${id}`;
-  document.getElementById('f_jobCode').value = o.jobCode || '';
-  document.getElementById('f_workOrder').value = o.workOrder || '';
-  document.getElementById('f_product').value = o.product || '';
-  document.getElementById('f_projectName').value = o.projectName || '';
-  document.getElementById('f_floor').value = o.floor || '';
-  document.getElementById('f_windowDoorNum').value = o.windowDoorNum || '';
-  document.getElementById('f_dueDate').value = o.dueDate || '';
-  document.getElementById('f_priority').value = o.priority || 'Normal';
-  document.getElementById('f_status').value = o.status || 'Pending';
-  document.getElementById('f_assignee').value = o.assignee || currentUser;
-  document.getElementById('f_reason').value = o.reason || '';
-  document.getElementById('f_notes').value = o.notes || '';
-  renderFormPhotos();
-  openModal('orderModal');
-}
-
-function openEditSvc(id) {
-  const d = getData();
-  const o = d.serviceOrders.find(x => x.id === id);
-  if (!o) return;
-  editingId = 'SVC:' + id;
-  pendingPhotos = (o.photos || []).map(p => ({...p}));
-  document.getElementById('orderModalTitle').textContent = `Edit Service Order — ${id}`;
-  document.getElementById('f_jobCode').value = o.jobCode || '';
-  document.getElementById('f_workOrder').value = o.workOrder || '';
-  document.getElementById('f_product').value = o.product || '';
-  document.getElementById('f_projectName').value = o.projectName || '';
-  document.getElementById('f_floor').value = o.floor || '';
-  document.getElementById('f_windowDoorNum').value = o.windowDoorNum || '';
-  document.getElementById('f_dueDate').value = o.serviceDate || '';
-  document.getElementById('f_priority').value = o.priority || 'Normal';
-  document.getElementById('f_status').value = o.status || 'Pending';
-  document.getElementById('f_assignee').value = o.assignee || currentUser;
-  document.getElementById('f_reason').value = o.reason || '';
-  document.getElementById('f_notes').value = o.notes || '';
-  renderFormPhotos();
-  openModal('orderModal');
-}
-
-function clearForm() {
-  ['f_jobCode','f_workOrder','f_product','f_projectName','f_floor','f_windowDoorNum','f_reason','f_notes'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('f_priority').value = 'Normal';
-  document.getElementById('f_status').value = 'Pending';
-  document.getElementById('f_assignee').value = currentUser;
-  document.getElementById('f_dueDate').value = '';
-}
-
-function saveOrder() {
-  const projectName = document.getElementById('f_projectName').value.trim();
-  const reason = document.getElementById('f_reason').value.trim();
-  const jobCode = document.getElementById('f_jobCode').value.trim();
-  if (!projectName || !reason || !jobCode) { toast('Please fill in Job Code, Project Name and Reason.'); return; }
-
-  const d = getData();
-  const isSvc = editingId && editingId.startsWith('SVC:');
-  const arr = isSvc ? d.serviceOrders : d.backOrders;
-  const realId = isSvc ? editingId.replace('SVC:','') : editingId;
-
-  const now = new Date().toISOString();
-  const orderData = {
-    jobCode: parseInt(jobCode)||0,
-    workOrder: parseInt(document.getElementById('f_workOrder').value)||0,
-    product: document.getElementById('f_product').value.trim(),
-    projectName,
-    floor: document.getElementById('f_floor').value.trim(),
-    windowDoorNum: document.getElementById('f_windowDoorNum').value.trim(),
-    dueDate: document.getElementById('f_dueDate').value || (isSvc ? '' : ''),
-    serviceDate: isSvc ? document.getElementById('f_dueDate').value : undefined,
-    priority: document.getElementById('f_priority').value,
-    status: document.getElementById('f_status').value,
-    assignee: document.getElementById('f_assignee').value,
-    reason,
-    notes: document.getElementById('f_notes').value.trim(),
-    photos: pendingPhotos,
-  };
-
-  if (realId) {
-    const idx = arr.findIndex(x => x.id === realId);
-    if (idx >= 0) {
-      const prev = arr[idx];
-      const activity = prev.activity || [];
-      if (prev.status !== orderData.status) activity.push({text:`Status changed: ${prev.status} → ${orderData.status}`,at:now,user:currentUser});
-      if (prev.priority !== orderData.priority) activity.push({text:`Priority changed: ${prev.priority} → ${orderData.priority}`,at:now,user:currentUser});
-      arr[idx] = {...prev, ...orderData, activity};
-    }
-  } else {
-    const prefix = isSvc ? 'SO' : 'BO';
-    const newOrder = {
-      id: getNextId(prefix, arr),
-      ...orderData,
-      comments: [],
-      activity: [{text:'Order created',at:now,user:currentUser}],
-      createdAt: now.slice(0,10),
-    };
-    arr.push(newOrder);
-  }
-
-  save();
-  closeModal('orderModal');
-  renderTable();
-  if (isSvc) renderServiceTable();
-  renderStats();
-  checkOverdue();
-  toast(realId ? 'Order updated ✓' : 'Order created ✓');
-  syncToCloud();
-}
-
-// ═══════════════════════════════════════════
-// MARK DONE / DELETE
-// ═══════════════════════════════════════════
-function markDone(id) {
-  const d = getData();
-  const o = d.backOrders.find(x => x.id === id);
-  if (!o) return;
-  o.status = 'Completed';
-  o.activity = o.activity || [];
-  o.activity.push({text:`Marked completed by ${currentUser}`,at:new Date().toISOString(),user:currentUser});
-  save(); renderTable(); renderStats(); syncToCloud();
-  toast('Order marked as completed ✓');
-}
-
-function deleteOrder(id) {
-  if (!confirm(`Delete order ${id}? This cannot be undone.`)) return;
-  const d = getData();
-  d.backOrders = d.backOrders.filter(x => x.id !== id);
-  save(); renderTable(); renderStats(); syncToCloud();
-  toast('Order deleted');
-}
-
-function deleteSvcOrder(id) {
-  if (!confirm(`Delete service order ${id}?`)) return;
-  const d = getData();
-  d.serviceOrders = d.serviceOrders.filter(x => x.id !== id);
-  save(); renderServiceTable(); syncToCloud();
-  toast('Service order deleted');
-}
-
-// ═══════════════════════════════════════════
-// ORDER DETAIL
-// ═══════════════════════════════════════════
-function openDetail(id) {
-  const d = getData();
-  const o = d.backOrders.find(x => x.id === id);
-  if (!o) return;
-  renderDetailModal(o, false);
-}
-
-function openDetailSvc(id) {
-  const d = getData();
-  const o = d.serviceOrders.find(x => x.id === id);
-  if (!o) return;
-  renderDetailModal(o, true);
-}
-
-function renderDetailModal(o, isSvc) {
-  document.getElementById('detailTitle').textContent = `${o.id} — ${o.projectName}`;
-  document.getElementById('detailEditBtn').onclick = () => { closeModal('detailModal'); isSvc ? openEditSvc(o.id) : openEdit(o.id); };
-  const photos = (o.photos||[]).map(p => {
-    if (p.type && p.type.startsWith('image/')) return `<div class="photo-item"><img src="${p.data}" onclick="viewPhoto('${p.data}')"><div class="file-name">${p.name}</div></div>`;
-    return `<div class="photo-item"><div class="file-icon" onclick="downloadFile('${p.data}','${p.name}')">📎<div class="file-name">${p.name}</div></div></div>`;
-  }).join('');
-  const comments = (o.comments||[]).map(c => `<div class="comment-item"><div class="meta">${c.user||'User'} · ${fmtRelative(c.at)}</div><div class="text">${c.text}</div></div>`).join('') || '<div class="text-muted text-sm">No comments yet.</div>';
-  const activity = (o.activity||[]).slice().reverse().map(a => `<div class="activity-item"><div class="activity-dot"></div><div><div class="activity-text">${a.text}${a.user?' — '+a.user:''}</div><div class="activity-time">${fmtRelative(a.at)}</div></div></div>`).join('');
-
-  document.getElementById('detailBody').innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-item"><div class="dl">Order ID</div><div class="dv">${o.id}</div></div>
-      <div class="detail-item"><div class="dl">Status</div><div class="dv">${statusBadge(o.status)}</div></div>
-      <div class="detail-item"><div class="dl">Job Code</div><div class="dv">${o.jobCode||'—'}</div></div>
-      <div class="detail-item"><div class="dl">Work Order</div><div class="dv">${o.workOrder||'—'}</div></div>
-      <div class="detail-item"><div class="dl">Project</div><div class="dv">${o.projectName}</div></div>
-      <div class="detail-item"><div class="dl">Product</div><div class="dv">${o.product||'—'}</div></div>
-      <div class="detail-item"><div class="dl">Floor / Location</div><div class="dv">${o.floor||'—'}</div></div>
-      <div class="detail-item"><div class="dl">Window / Door #</div><div class="dv">${o.windowDoorNum||'—'}</div></div>
-      <div class="detail-item"><div class="dl">Due / Service Date</div><div class="dv">${formatDate(o.dueDate||o.serviceDate)}</div></div>
-      <div class="detail-item"><div class="dl">Priority</div><div class="dv">${priorityBadge(o.priority)}</div></div>
-      <div class="detail-item"><div class="dl">Assigned To</div><div class="dv">${avatarHtml(o.assignee)} ${o.assignee}</div></div>
-      <div class="detail-item"><div class="dl">Created</div><div class="dv">${o.createdAt||'—'}</div></div>
+function renderDailySummary() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const all = [...backOrders, ...serviceOrders];
+  const overdue = all.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today).length;
+  const dueToday = all.filter(o => o.status !== 'Completed' && datesEqual(new Date(o.dueDate), today)).length;
+  const urgent = all.filter(o => o.status !== 'Completed' && o.priority === 'Urgent').length;
+  const myOpen = all.filter(o => o.status !== 'Completed' && o.assignee === currentUser).length;
+  let msg;
+  if (isEndOfDay()) {
+    const doneToday = all.filter(o => o.completedAt && datesEqual(new Date(o.completedAt), today)).length;
+    const myDoneToday = all.filter(o => o.completedAt && datesEqual(new Date(o.completedAt), today) && o.assignee === currentUser).length;
+    msg = `<strong>End of day summary:</strong> The team completed ${doneToday} order${doneToday!==1?'s':''} today (${myDoneToday} by you). ${overdue} still need follow-up tomorrow.`;
+  } else if (overdue > 0) msg = `You have <strong>${overdue} overdue</strong> order${overdue>1?'s':''} that need immediate attention.`;
+  else if (urgent > 0) msg = `<strong>${urgent} urgent</strong> order${urgent>1?'s':''} ${urgent>1?'are':'is'} open today.`;
+  else if (dueToday > 0) msg = `<strong>${dueToday}</strong> order${dueToday>1?'s are':' is'} due today.`;
+  else msg = "All caught up — great work!";
+  document.getElementById('daily-summary').innerHTML = `
+    <div class="summary-greeting">
+      <h2>${getGreeting()}, ${currentUser} 👋</h2>
+      <p>${msg}</p>
     </div>
-    <div class="detail-item" style="margin-bottom:12px"><div class="dl">Reason</div><div class="dv" style="margin-top:4px">${o.reason||'—'}</div></div>
-    ${o.notes ? `<div class="detail-item" style="margin-bottom:12px"><div class="dl">Notes</div><div class="dv" style="margin-top:4px">${o.notes}</div></div>` : ''}
-    ${photos ? `<div style="margin-bottom:16px"><div class="dl" style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--gray-400);margin-bottom:8px">Attachments</div><div class="photo-gallery">${photos}</div></div>` : ''}
-    <div class="comments-area">
-      <h4>Comments</h4>
-      <div id="detailComments">${comments}</div>
+    <div class="summary-stats">
+      <div class="summary-stat"><div class="summary-num">${myOpen}</div><div class="summary-label">My Open</div></div>
+      <div class="summary-stat"><div class="summary-num">${overdue}</div><div class="summary-label">Overdue</div></div>
+      <div class="summary-stat"><div class="summary-num">${dueToday}</div><div class="summary-label">Due Today</div></div>
+      <div class="summary-stat"><div class="summary-num">${urgent}</div><div class="summary-label">Urgent</div></div>
+    </div>
+  `;
+}
+// ─── QUICK FILTERS ──────────────────────────────────────
+function renderQuickFilters() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const orders = activeTab === 'backorders' ? backOrders : serviceOrders;
+  const counts = {
+    all: orders.length,
+    mine: orders.filter(o => o.assignee === currentUser && o.status !== 'Completed').length,
+    overdue: orders.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today).length,
+    urgent: orders.filter(o => o.priority === 'Urgent' && o.status !== 'Completed').length,
+    today: orders.filter(o => o.status !== 'Completed' && datesEqual(new Date(o.dueDate), today)).length,
+  };
+  const filters = [
+    { id:'all', label:'All', count:counts.all },
+    { id:'mine', label:'👤 My Orders', count:counts.mine },
+    { id:'overdue', label:'⚠ Overdue', count:counts.overdue },
+    { id:'urgent', label:'🔥 Urgent', count:counts.urgent },
+    { id:'today', label:'📅 Due Today', count:counts.today },
+  ];
+  document.getElementById('quick-filters').innerHTML = filters.map(f =>
+    `<div class="qf-pill ${quickFilter===f.id?'active':''}" onclick="setQuickFilter('${f.id}')">${f.label} <span class="count">${f.count}</span></div>`
+  ).join('');
+}
+function setQuickFilter(id) { quickFilter = id; renderQuickFilters(); renderTable(); }
+// ─── WEEKLY CHART ───────────────────────────────────────
+function renderWeeklyChart() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const all = [...backOrders, ...serviceOrders];
+    const count = all.filter(o => o.completedAt && datesEqual(new Date(o.completedAt), d)).length;
+    days.push({ date: d, count, label: d.toLocaleDateString('en-US', { weekday:'short' }) });
+  }
+  const max = Math.max(...days.map(d => d.count), 1);
+  document.getElementById('weekly-chart').innerHTML = days.map(d => `
+    <div class="bar-group">
+      <div class="bar" style="height:${(d.count/max)*100}%">
+        <div class="bar-tooltip">${d.count} done · ${d.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+      </div>
+      <div class="bar-label">${d.label}</div>
+    </div>
+  `).join('');
+}
+// ─── RECURRING PROBLEMS ─────────────────────────────────
+function renderRecurringProblems() {
+  const counts = {};
+  [...backOrders, ...serviceOrders].forEach(o => {
+    const key = o.projectName || o.client;
+    if (!key) return;
+    if (!counts[key]) counts[key] = { count:0, urgent:0 };
+    counts[key].count++;
+    if (o.priority === 'Urgent') counts[key].urgent++;
+  });
+  const sorted = Object.entries(counts).sort((a,b) => b[1].count - a[1].count).slice(0, 5);
+  if (!sorted.length) {
+    document.getElementById('recurring-list').innerHTML = '<div style="color:var(--muted);font-size:0.8rem;font-style:italic;padding:8px">No patterns yet.</div>';
+    return;
+  }
+  document.getElementById('recurring-list').innerHTML = sorted.map(([name, d]) => `
+    <div class="recurring-item">
+      <div>
+        <div class="recurring-name">${name}</div>
+        <div class="recurring-meta">${d.urgent} urgent · ${d.count} total</div>
+      </div>
+      <div class="recurring-count">${d.count}</div>
+    </div>
+  `).join('');
+}
+// ─── NOTIFICATIONS ──────────────────────────────────────
+function pushNotification(title, msg, type='') {
+  // Toast
+  const n = document.createElement('div');
+  n.className = `notification ${type}`;
+  n.innerHTML = `<div class="notif-title">${title}</div><div class="notif-msg">${msg}</div>`;
+  n.onclick = () => n.remove();
+  document.getElementById('notification-area').appendChild(n);
+  setTimeout(() => n.remove(), 6000);
+  // Persistent
+  notifications.unshift({ id: Date.now(), title, msg, type, at: new Date().toISOString(), read: false, user: currentUser });
+  if (notifications.length > 50) notifications = notifications.slice(0, 50);
+  saveData();
+  renderNotifBadge();
+}
+function renderNotifBadge() {
+  const userNotifs = notifications.filter(n => !n.user || n.user === currentUser);
+  const unread = userNotifs.filter(n => !n.read).length;
+  const badge = document.getElementById('notif-badge');
+  if (unread > 0) { badge.classList.add('show'); badge.textContent = unread > 99 ? '99+' : unread; }
+  else badge.classList.remove('show');
+}
+function toggleNotifDropdown() {
+  const d = document.getElementById('notif-dropdown');
+  d.classList.toggle('open');
+  if (d.classList.contains('open')) renderNotifDropdown();
+}
+function renderNotifDropdown() {
+  const list = document.getElementById('notif-dropdown-list');
+  const userNotifs = notifications.filter(n => !n.user || n.user === currentUser);
+  if (!userNotifs.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">No notifications yet.</div>'; return; }
+  list.innerHTML = userNotifs.slice(0, 30).map(n => `
+    <div class="notif-row ${n.read?'':'unread'} ${n.type==='warning'||n.type==='urgent'?'urgent':''}" onclick="markNotifRead(${n.id})">
+      <div class="notif-row-title">${n.title}</div>
+      <div class="notif-row-msg">${n.msg}</div>
+      <div class="notif-row-time">${timeAgo(n.at)}</div>
+    </div>
+  `).join('');
+}
+function markNotifRead(id) { const n = notifications.find(x => x.id === id); if(n) { n.read = true; saveData(); renderNotifBadge(); renderNotifDropdown(); } }
+function markAllNotifsRead() { notifications.forEach(n => { if (!n.user || n.user === currentUser) n.read = true; }); saveData(); renderNotifBadge(); renderNotifDropdown(); }
+function checkOverdueAndReminders() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const all = [...backOrders, ...serviceOrders];
+  const seen = new Set(notifications.filter(n => n.at && new Date(n.at).toDateString() === new Date().toDateString()).map(n => n.title + n.msg));
+  all.forEach(o => {
+    if (o.status === 'Completed') return;
+    const due = new Date(o.dueDate);
+    const diffDays = Math.floor((due - today) / (1000*60*60*24));
+    const target = o.assignee || 'Abhay';
+    if (target !== currentUser) return; // only notify the assignee
+    // Overdue
+    if (diffDays < 0) {
+      const key = `⚠️ Overdue: ${o.id}`;
+      if (!seen.has(key + `${o.id} is ${Math.abs(diffDays)} day${Math.abs(diffDays)>1?'s':''} overdue`)) {
+        pushNotification('⚠️ Overdue', `${o.id} is ${Math.abs(diffDays)} day${Math.abs(diffDays)>1?'s':''} overdue`, 'warning');
+      }
+    }
+    // Smart reminder: due in 1-2 days but still pending
+    else if (diffDays <= 2 && o.status === 'Pending') {
+      const key = `⏰ Reminder: ${o.id} due in ${diffDays} day${diffDays!==1?'s':''} but not started yet`;
+      if (!seen.has('⏰ Reminder' + key)) {
+        pushNotification('⏰ Reminder', `${o.id} due in ${diffDays} day${diffDays!==1?'s':''} but not started yet`, 'warning');
+      }
+    }
+  });
+  // End-of-day summary
+  if (isEndOfDay()) {
+    const today2 = new Date().toDateString();
+    if (!notifications.some(n => n.title === '📋 End of Day Summary' && new Date(n.at).toDateString() === today2 && n.user === currentUser)) {
+      const all2 = [...backOrders, ...serviceOrders];
+      const myDone = all2.filter(o => o.completedAt && datesEqual(new Date(o.completedAt), today) && o.assignee === currentUser).length;
+      const myPending = all2.filter(o => o.status !== 'Completed' && o.assignee === currentUser).length;
+      pushNotification('📋 End of Day Summary', `Today: ${myDone} completed · ${myPending} still on your plate for tomorrow.`, 'success');
+    }
+  }
+}
+function timeAgo(iso) {
+  const sec = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (sec < 60) return 'just now';
+  if (sec < 3600) return `${Math.floor(sec/60)}m ago`;
+  if (sec < 86400) return `${Math.floor(sec/3600)}h ago`;
+  return `${Math.floor(sec/86400)}d ago`;
+}
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tabs .tab').forEach((t, i) => {
+    if (i === 0) t.classList.toggle('active', tab === 'backorders');
+    else if (i === 1) t.classList.toggle('active', tab === 'serviceorders');
+  });
+  document.getElementById('search-input').value = '';
+  document.getElementById('filter-priority').value = '';
+  document.getElementById('filter-status').value = '';
+  renderAll();
+}
+// ─── KPIs ────────────────────────────────────────────────
+function renderKPIs() {
+  const orders = activeTab === 'backorders' ? backOrders : serviceOrders;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const overdue = orders.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today).length;
+  const urgent = orders.filter(o => o.priority === 'Urgent' && o.status !== 'Completed').length;
+  const onhold = orders.filter(o => o.priority === 'On Hold').length;
+  const active = orders.filter(o => o.status === 'Pending' || o.status === 'In-Progress').length;
+  const done = orders.filter(o => o.status === 'Completed').length;
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-card red-top"><div class="kpi-label">Overdue</div><div class="kpi-val" style="color:var(--urgent)">${overdue}</div><div class="kpi-sub">past due</div></div>
+    <div class="kpi-card red-top"><div class="kpi-label">Urgent</div><div class="kpi-val">${urgent}</div><div class="kpi-sub">open</div></div>
+    <div class="kpi-card blue-top"><div class="kpi-label">Active</div><div class="kpi-val">${active}</div><div class="kpi-sub">in progress</div></div>
+    <div class="kpi-card gray-top"><div class="kpi-label">On Hold</div><div class="kpi-val" style="color:var(--onhold)">${onhold}</div><div class="kpi-sub">paused</div></div>
+    <div class="kpi-card green-top"><div class="kpi-label">Completed</div><div class="kpi-val" style="color:var(--green)">${done}</div><div class="kpi-sub">total done</div></div>
+  `;
+  const banner = document.getElementById('overdue-banner');
+  if (overdue > 0) {
+    banner.style.display = 'block';
+    document.getElementById('overdue-text').textContent = `${overdue} order(s) OVERDUE — immediate follow-up required.`;
+  } else banner.style.display = 'none';
+}
+// ─── TABLE ───────────────────────────────────────────────
+function renderTable() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filterP = document.getElementById('filter-priority').value;
+  const filterS = document.getElementById('filter-status').value;
+  const today = new Date(); today.setHours(0,0,0,0);
+  let orders = activeTab === 'backorders' ? [...backOrders] : [...serviceOrders];
+  // Quick filter
+  if (quickFilter === 'mine') orders = orders.filter(o => o.assignee === currentUser && o.status !== 'Completed');
+  else if (quickFilter === 'overdue') orders = orders.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today);
+  else if (quickFilter === 'urgent') orders = orders.filter(o => o.priority === 'Urgent' && o.status !== 'Completed');
+  else if (quickFilter === 'today') orders = orders.filter(o => o.status !== 'Completed' && datesEqual(new Date(o.dueDate), today));
+  if (search) orders = orders.filter(o => JSON.stringify(o).toLowerCase().includes(search));
+  if (filterP) orders = orders.filter(o => o.priority === filterP);
+  if (filterS) orders = orders.filter(o => o.status === filterS);
+  orders.sort((a, b) => {
+    const aOver = a.status !== 'Completed' && new Date(a.dueDate) < today;
+    const bOver = b.status !== 'Completed' && new Date(b.dueDate) < today;
+    if (aOver !== bOver) return aOver ? -1 : 1;
+    const aDone = a.status === 'Completed', bDone = b.status === 'Completed';
+    if (aDone !== bDone) return aDone ? 1 : -1;
+    if ((PRIORITY_WEIGHT[a.priority]||1) !== (PRIORITY_WEIGHT[b.priority]||1)) return (PRIORITY_WEIGHT[a.priority]||1) - (PRIORITY_WEIGHT[b.priority]||1);
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
+  activeTab === 'backorders' ? renderBOTable(orders, today) : renderSOTable(orders, today);
+}
+function getRowClass(o, today) {
+  if (o.status === 'Completed') return 'row-done';
+  if (new Date(o.dueDate) < today) return 'row-overdue';
+  if (o.priority === 'Urgent') return 'row-urgent';
+  if (o.priority === 'On Hold') return 'row-onhold';
+  return '';
+}
+function getDueDateCell(o, today) {
+  const due = new Date(o.dueDate);
+  const isOverdue = o.status !== 'Completed' && due < today;
+  let extra = '';
+  if (isOverdue) {
+    const days = Math.floor((today - due) / (1000*60*60*24));
+    extra = `<span class="days-overdue">${days} day${days!==1?'s':''} overdue</span>`;
+  } else if (o.status !== 'Completed') {
+    const daysLeft = Math.floor((due - today) / (1000*60*60*24));
+    if (daysLeft <= 7) extra = `<span class="days-pending ${daysLeft<=2?'warn':''}">in ${daysLeft} day${daysLeft!==1?'s':''}</span>`;
+  }
+  return `<span class="date-cell ${isOverdue?'overdue':''}">${fmt(o.dueDate)}${isOverdue?' ⚠':''}${extra}</span>`;
+}
+function getAssigneeCell(name) {
+  if (!name) return '<span style="color:var(--muted);font-size:0.74rem">—</span>';
+  const initials = name.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+  const color = USER_COLORS[name] || '#666';
+  return `<span class="assignee-tag"><span class="assignee-avatar" style="background:${color}">${initials}</span>${name}</span>`;
+}
+function commentBadge(o) {
+  const c = (o.comments||[]).length, p = (o.photos||[]).length, a = (o.activity||[]).length;
+  let parts = [];
+  if (c) parts.push(`💬${c}`);
+  if (p) parts.push(`📎${p}`);
+  if (a) parts.push(`📝${a}`);
+  if (!parts.length) return '';
+  return `<span style="font-size:0.66rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-left:6px">${parts.join(' ')}</span>`;
+}
+function renderBOTable(orders, today) {
+  document.getElementById('table-head').innerHTML = `<tr>
+    <th>Job Code</th><th>Work Order</th><th>Project</th><th>Floor</th><th>W/D #</th>
+    <th>Due</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Reason</th><th>Actions</th>
+  </tr>`;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  if (!orders.length) { tbody.innerHTML = emptyRow(11); return; }
+  orders.forEach(o => {
+    const tr = document.createElement('tr');
+    tr.className = `${getRowClass(o, today)} fade-in`;
+    tr.innerHTML = `
+      <td><span class="order-id">${o.jobCode}</span>${commentBadge(o)}</td>
+      <td><span class="order-id">${o.workOrder}</span></td>
+      <td><strong>${o.projectName}</strong></td>
+      <td>${o.floor}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem">${o.windowDoorNum}</td>
+      <td>${getDueDateCell(o, today)}</td>
+      <td><span class="priority-badge pri-${o.priority.replace(' ','-')}">${o.priority}</span></td>
+      <td><span class="status-badge st-${o.status.replace(' ','-')}">${o.status}</span></td>
+      <td>${getAssigneeCell(o.assignee)}</td>
+      <td style="max-width:160px;font-size:0.76rem;color:var(--muted)">${o.reason}</td>
+      <td><div class="action-btns">
+        ${o.status !== 'Completed' ? `<button class="btn btn-outline btn-sm" onclick="markComplete('${o.id}')">✓</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="editOrder('${o.id}')">Edit</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--urgent);border-color:var(--urgent)" onclick="deleteOrder('${o.id}')">✕</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function renderSOTable(orders, today) {
+  document.getElementById('table-head').innerHTML = `<tr>
+    <th>SO #</th><th>Job Code</th><th>Client</th><th>Issue</th><th>Tech</th>
+    <th>Due</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Notes</th><th>Actions</th>
+  </tr>`;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  if (!orders.length) { tbody.innerHTML = emptyRow(11); return; }
+  orders.forEach(o => {
+    const tr = document.createElement('tr');
+    tr.className = `${getRowClass(o, today)} fade-in`;
+    tr.innerHTML = `
+      <td><span class="order-id">${o.id}</span>${commentBadge(o)}</td>
+      <td><span class="order-id">${o.jobCode||''}</span></td>
+      <td><strong>${o.client}</strong></td>
+      <td>${o.issueType}</td>
+      <td>${o.technician}</td>
+      <td>${getDueDateCell(o, today)}</td>
+      <td><span class="priority-badge pri-${o.priority.replace(' ','-')}">${o.priority}</span></td>
+      <td><span class="status-badge st-${o.status.replace(' ','-')}">${o.status}</span></td>
+      <td>${getAssigneeCell(o.assignee)}</td>
+      <td style="max-width:160px;font-size:0.76rem;color:var(--muted)">${o.notes}</td>
+      <td><div class="action-btns">
+        ${o.status !== 'Completed' ? `<button class="btn btn-outline btn-sm" onclick="markComplete('${o.id}')">✓</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="editOrder('${o.id}')">Edit</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--urgent);border-color:var(--urgent)" onclick="deleteOrder('${o.id}')">✕</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+}
+// ─── MODAL ──────────────────────────────────────────────
+function openModal(prefill = null) {
+  editingId = prefill ? prefill.id : null;
+  currentPhotos = prefill ? [...(prefill.photos || [])] : [];
+  currentComments = prefill ? [...(prefill.comments || [])] : [];
+  currentActivity = prefill ? [...(prefill.activity || [])] : [];
+  document.getElementById('modal-title').textContent = editingId
+    ? (activeTab === 'backorders' ? 'Edit Back Order' : 'Edit Service Order')
+    : (activeTab === 'backorders' ? 'New Back Order' : 'New Service Order');
+  document.getElementById('email-btn').style.display = editingId ? 'inline-block' : 'none';
+  const f = document.getElementById('modal-form');
+  const priOpts = PRIORITIES.map(p => `<option ${prefill?.priority===p?'selected':''}>${p}</option>`).join('');
+  const staOpts = STATUSES.map(s => `<option ${prefill?.status===s?'selected':''}>${s}</option>`).join('');
+  const teamOpts = ['<option value="">— Unassigned —</option>', ...TEAM.map(t => `<option ${prefill?.assignee===t?'selected':''}>${t}</option>`)].join('');
+  if (activeTab === 'backorders') {
+    f.innerHTML = `
+      <input type="hidden" id="f-id" value="${prefill?.id || genId('BO')}">
+      <div class="form-group"><label class="form-label">Job Code</label><input class="form-input" id="f-jobCode" placeholder="e.g. 1074" value="${prefill?.jobCode||''}"></div>
+      <div class="form-group"><label class="form-label">Work Order #</label><input class="form-input" id="f-workOrder" placeholder="e.g. WO-4421" value="${prefill?.workOrder||''}"></div>
+      <div class="form-group full"><label class="form-label">Project Name</label><input class="form-input" id="f-projectName" placeholder="e.g. Maple Ridge Phase 2" value="${prefill?.projectName||''}"></div>
+      <div class="form-group"><label class="form-label">Floor</label><input class="form-input" id="f-floor" placeholder="e.g. 3rd Floor" value="${prefill?.floor||''}"></div>
+      <div class="form-group"><label class="form-label">Window / Door #</label><input class="form-input" id="f-windowDoorNum" placeholder="e.g. W-14, D-01" value="${prefill?.windowDoorNum||''}"></div>
+      <div class="form-group"><label class="form-label">Product</label><select class="form-select" id="f-product">${PRODUCTS.map(p=>`<option ${prefill?.product===p?'selected':''}>${p}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="f-dueDate" type="date" value="${prefill?.dueDate||''}"></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority">${priOpts}</select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${staOpts}</select></div>
+      <div class="form-group full"><label class="form-label">Assigned To</label><select class="form-select" id="f-assignee">${teamOpts}</select></div>
+      <div class="form-group full"><label class="form-label">Reason</label><textarea class="form-textarea" id="f-reason">${prefill?.reason||''}</textarea></div>
+      ${photoSection()}
+      ${commentSection()}
+      ${activitySection()}
+    `;
+  } else {
+    f.innerHTML = `
+      <input type="hidden" id="f-id" value="${prefill?.id || genId('SO')}">
+      <div class="form-group"><label class="form-label">Job Code</label><input class="form-input" id="f-jobCode" value="${prefill?.jobCode||''}"></div>
+      <div class="form-group"><label class="form-label">Client Name</label><input class="form-input" id="f-client" value="${prefill?.client||''}"></div>
+      <div class="form-group"><label class="form-label">Issue Type</label><select class="form-select" id="f-issueType">${ISSUE_TYPES.map(t=>`<option ${prefill?.issueType===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Technician</label><input class="form-input" id="f-technician" value="${prefill?.technician||''}"></div>
+      <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="f-dueDate" type="date" value="${prefill?.dueDate||''}"></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority">${priOpts}</select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${staOpts}</select></div>
+      <div class="form-group"><label class="form-label">Assigned To</label><select class="form-select" id="f-assignee">${teamOpts}</select></div>
+      <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" id="f-notes">${prefill?.notes||''}</textarea></div>
+      ${photoSection()}
+      ${commentSection()}
+      ${activitySection()}
+    `;
+  }
+  renderPhotos();
+  renderComments();
+  renderActivity();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function photoSection() {
+  return `
+    <div class="form-group full">
+      <label class="form-label">Photos</label>
+      <label class="photo-upload-area">
+        <div style="font-size:1.5rem">📷</div>
+        <div style="font-size:0.78rem;color:var(--muted)">Tap to add photos (camera or gallery)</div>
+        <input type="file" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(event)">
+      </label>
+      <div class="photo-grid" id="photo-grid"></div>
+    </div>
+  `;
+}
+function commentSection() {
+  return `
+    <div class="comments-section">
+      <div class="comments-title">💬 Comments (use @name to tag, e.g. @Firas)</div>
+      <div class="comments-list" id="comments-list"></div>
       <div class="comment-input-row">
-        <input type="text" id="commentInput" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment('${o.id}',${isSvc})">
-        <button class="btn btn-blue btn-sm" onclick="addComment('${o.id}',${isSvc})">Post</button>
+        <input class="comment-input" id="comment-input" placeholder="Add a comment… use @name to tag" onkeydown="if(event.key==='Enter')addComment()">
+        <button class="btn btn-primary btn-sm" onclick="addComment()">Add</button>
       </div>
     </div>
-    <div class="activity-log">
-      <h4>Activity</h4>
-      <div>${activity || '<div class="text-muted text-sm">No activity yet.</div>'}</div>
-    </div>`;
-  openModal('detailModal');
+  `;
 }
-
-function addComment(id, isSvc) {
-  const input = document.getElementById('commentInput');
-  const text = input.value.trim();
-  if (!text) return;
-  const d = getData();
-  const arr = isSvc ? d.serviceOrders : d.backOrders;
-  const o = arr.find(x => x.id === id);
-  if (!o) return;
-  o.comments = o.comments || [];
-  o.comments.push({user:currentUser, text, at:new Date().toISOString()});
-  o.activity = o.activity || [];
-  o.activity.push({text:`Comment added by ${currentUser}`,at:new Date().toISOString(),user:currentUser});
-  save(); input.value = '';
-  renderDetailModal(o, isSvc);
-  syncToCloud();
+function activitySection() {
+  return `
+    <div class="activity-section">
+      <div class="comments-title">📝 Activity Log</div>
+      <div class="activity-list" id="activity-list"></div>
+    </div>
+  `;
 }
-
-// ═══════════════════════════════════════════
-// PHOTOS
-// ═══════════════════════════════════════════
 function handlePhotoUpload(e) {
   const files = Array.from(e.target.files);
   files.forEach(file => {
+    if (currentPhotos.length >= 6) { alert('Max 6 photos.'); return; }
     const reader = new FileReader();
-    reader.onload = ev => {
-      pendingPhotos.push({id: Date.now()+Math.random(), name:file.name, type:file.type, data:ev.target.result});
-      renderFormPhotos();
-    };
+    reader.onload = (evt) => { currentPhotos.push({ data: evt.target.result, name: file.name }); renderPhotos(); };
     reader.readAsDataURL(file);
   });
-  e.target.value = '';
 }
-
-function renderFormPhotos() {
-  const gallery = document.getElementById('photoGallery');
-  gallery.innerHTML = pendingPhotos.map((p,i) => {
-    if (p.type && p.type.startsWith('image/')) {
-      return `<div class="photo-item"><img src="${p.data}" onclick="viewPhoto('${p.data}')"><button class="remove-photo" onclick="removeFormPhoto(${i})">✕</button><div class="file-name">${p.name}</div></div>`;
-    }
-    return `<div class="photo-item"><div class="file-icon">📎<div class="file-name">${p.name}</div></div><button class="remove-photo" onclick="removeFormPhoto(${i})">✕</button></div>`;
-  }).join('');
+function renderPhotos() {
+  const g = document.getElementById('photo-grid'); if (!g) return;
+  g.innerHTML = currentPhotos.map((p, i) => `
+    <div class="photo-thumb" onclick="openLightbox('${p.data}')">
+      <img src="${p.data}">
+      <button class="photo-remove" onclick="event.stopPropagation();removePhoto(${i})">✕</button>
+    </div>
+  `).join('');
 }
-
-function removeFormPhoto(idx) {
-  pendingPhotos.splice(idx,1);
-  renderFormPhotos();
-}
-
-function viewPhoto(src) {
-  document.getElementById('photoViewerImg').src = src;
-  openModal('photoViewer');
-}
-
-function downloadFile(data, name) {
-  const a = document.createElement('a');
-  a.href = data; a.download = name; a.click();
-}
-
-// ═══════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════
-function checkOverdue() {
-  const d = getData();
-  const now = new Date(); now.setHours(0,0,0,0);
-  const unread = d.backOrders.filter(o => o.status !== 'Completed' && o.dueDate && new Date(o.dueDate) < now);
-  // Add new overdue notifications
-  unread.forEach(o => {
-    const days = Math.round((now - new Date(o.dueDate)) / 86400000);
-    const exists = (d.notifications||[]).some(n => n.orderId === o.id && n.day === now.toISOString().slice(0,10));
-    if (!exists) {
-      d.notifications = d.notifications || [];
-      d.notifications.unshift({id:Date.now()+Math.random(), orderId:o.id, day:now.toISOString().slice(0,10), title:'⚠️ Overdue', msg:`${o.id} (${o.projectName}) is ${days} day${days!==1?'s':''} overdue`, type:'warning', at:new Date().toISOString(), read:false, user:'all'});
+function removePhoto(i) { currentPhotos.splice(i, 1); renderPhotos(); }
+function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+function addComment() {
+  const input = document.getElementById('comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  // Detect @mentions
+  const mentions = (text.match(/@(\w+(\s\w\.)?)/g) || []).map(m => m.slice(1));
+  currentComments.push({ text, author: currentUser, at: new Date().toISOString(), mentions });
+  // Notify mentioned users
+  mentions.forEach(mention => {
+    const user = TEAM.find(t => t.toLowerCase().startsWith(mention.toLowerCase()));
+    if (user && user !== currentUser) {
+      notifications.unshift({ id: Date.now()+Math.random(), title: `📨 You were tagged by ${currentUser}`, msg: `On ${editingId || 'a new order'}: "${text}"`, type: 'success', at: new Date().toISOString(), read: false, user });
     }
   });
-  save();
-  renderNotifCount();
-  renderNotifList();
+  currentActivity.push({ at: new Date().toISOString(), user: currentUser, text: `commented: "${text.slice(0,50)}${text.length>50?'…':''}"` });
+  input.value = '';
+  renderComments();
+  renderActivity();
 }
-
-function renderNotifCount() {
-  const d = getData();
-  const unread = (d.notifications||[]).filter(n => !n.read).length;
-  const el = document.getElementById('notifCount');
-  el.textContent = unread;
-  el.style.display = unread ? 'block' : 'none';
-}
-
-function renderNotifList() {
-  const d = getData();
-  const list = document.getElementById('notifList');
-  const notifs = (d.notifications||[]).slice(0,20);
-  if (!notifs.length) { list.innerHTML = '<div class="notif-empty">No notifications</div>'; return; }
-  list.innerHTML = notifs.map(n => `
-    <div class="notif-item ${n.read?'':'unread'}">
-      <div class="notif-title">${n.title}</div>
-      <div class="notif-msg">${n.msg}</div>
-      <div class="notif-time">${fmtRelative(n.at)}</div>
-    </div>`).join('');
-}
-
-function toggleNotif() {
-  const p = document.getElementById('notifPanel');
-  p.classList.toggle('open');
-  if (p.classList.contains('open')) { renderNotifList(); }
-}
-
-function markAllRead() {
-  const d = getData();
-  (d.notifications||[]).forEach(n => n.read = true);
-  save(); renderNotifCount(); renderNotifList();
-}
-
-// ═══════════════════════════════════════════
-// REPORT
-// ═══════════════════════════════════════════
-function openReport() {
-  const d = getData();
-  const now = new Date(); now.setHours(0,0,0,0);
-  const orders = d.backOrders;
-  const open = orders.filter(o => o.status !== 'Completed').length;
-  const overdue = orders.filter(o => o.status !== 'Completed' && o.dueDate && new Date(o.dueDate) < now).length;
-  const done = orders.filter(o => o.status === 'Completed').length;
-
-  // By project
-  const byProject = {};
-  orders.filter(o => o.status !== 'Completed').forEach(o => { byProject[o.projectName] = (byProject[o.projectName]||0)+1; });
-  const projectRows = Object.entries(byProject).sort((a,b)=>b[1]-a[1]).map(([p,c]) => `<tr><td>${p}</td><td>${c}</td></tr>`).join('');
-
-  // By assignee
-  const byAsgn = {};
-  orders.filter(o => o.status !== 'Completed').forEach(o => { byAsgn[o.assignee] = (byAsgn[o.assignee]||0)+1; });
-  const asgnRows = Object.entries(byAsgn).sort((a,b)=>b[1]-a[1]).map(([a,c]) => `<tr><td>${avatarHtml(a)} ${a}</td><td>${c}</td></tr>`).join('');
-
-  // Weekly chart
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const counts = [0,0,0,0,0,0,0];
-  const todayDay = (now.getDay()+6)%7;
-  orders.filter(o => o.status === 'Completed' && o.activity).forEach(o => {
-    const comp = o.activity.find(a => a.text && a.text.includes('Completed'));
-    if (!comp) return;
-    const d2 = new Date(comp.at); d2.setHours(0,0,0,0);
-    const diff = Math.round((now - d2) / 86400000);
-    if (diff >= 0 && diff < 7) counts[6-diff]++;
-  });
-  const max = Math.max(...counts, 1);
-  const bars = days.map((day,i) => {
-    const h = Math.round((counts[i]/max)*80);
-    const isToday = i === todayDay;
-    return `<div class="chart-bar-col"><div class="chart-bar-val">${counts[i]}</div><div class="chart-bar ${isToday?'today':''}" style="height:${Math.max(h,3)}px"></div><div class="chart-bar-label">${day}</div></div>`;
+function renderComments() {
+  const list = document.getElementById('comments-list'); if (!list) return;
+  if (!currentComments.length) { list.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;font-style:italic;padding:6px 0">No comments yet.</div>'; return; }
+  list.innerHTML = currentComments.map(c => {
+    const escaped = escapeHtml(c.text).replace(/@(\w+(\s\w\.)?)/g, '<span class="mention">@$1</span>');
+    return `
+      <div class="comment">
+        <div class="comment-meta">${c.author} · ${new Date(c.at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</div>
+        <div class="comment-text">${escaped}</div>
+      </div>
+    `;
   }).join('');
-
-  document.getElementById('reportBody').innerHTML = `
-    <div class="report-summary">
-      <div class="report-stat"><div class="rs-val">${open}</div><div class="rs-label">Open Orders</div></div>
-      <div class="report-stat"><div class="rs-val" style="color:var(--red)">${overdue}</div><div class="rs-label">Overdue</div></div>
-      <div class="report-stat"><div class="rs-val" style="color:var(--green)">${done}</div><div class="rs-label">Completed Total</div></div>
+  list.scrollTop = list.scrollHeight;
+}
+function renderActivity() {
+  const list = document.getElementById('activity-list'); if (!list) return;
+  if (!currentActivity.length) { list.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;font-style:italic;padding:6px 0">No activity yet.</div>'; return; }
+  list.innerHTML = [...currentActivity].reverse().map(a => `
+    <div class="activity-item">
+      <span class="activity-time">${timeAgo(a.at)}</span>
+      <span class="activity-text"><strong>${a.user}</strong> ${a.text}</span>
     </div>
-    <div class="section-header"><h3>📊 Completed Orders — Last 7 Days</h3></div>
-    <div class="chart-wrap"><div class="chart-bars">${bars}</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
-      <div>
-        <div class="section-header"><h3>By Project (Open)</h3></div>
-        <table style="width:100%"><thead><tr><th>Project</th><th>Count</th></tr></thead><tbody>${projectRows||'<tr><td colspan="2" class="text-muted">None</td></tr>'}</tbody></table>
-      </div>
-      <div>
-        <div class="section-header"><h3>By Assignee (Open)</h3></div>
-        <table style="width:100%"><thead><tr><th>Assignee</th><th>Count</th></tr></thead><tbody>${asgnRows||'<tr><td colspan="2" class="text-muted">None</td></tr>'}</tbody></table>
-      </div>
-    </div>
-    ${overdue > 0 ? `<div style="margin-top:20px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px"><strong style="color:var(--red)">⚠ Overdue Orders Requiring Immediate Attention:</strong><ul style="margin-top:8px;padding-left:16px">${orders.filter(o=>o.status!=='Completed'&&o.dueDate&&new Date(o.dueDate)<now).map(o=>`<li style="margin:4px 0;font-size:13px">${o.id} — ${o.projectName} (${o.assignee}) — due ${formatDate(o.dueDate)}</li>`).join('')}</ul></div>` : ''}
-  `;
-
-  document.querySelectorAll('#reportModal .nav-item').forEach(el => el.classList.remove('active'));
-  openModal('reportModal');
+  `).join('');
 }
-
-function emailReport() {
-  const d = getData();
-  const now = new Date(); now.setHours(0,0,0,0);
-  const open = d.backOrders.filter(o=>o.status!=='Completed').length;
-  const overdue = d.backOrders.filter(o=>o.status!=='Completed'&&o.dueDate&&new Date(o.dueDate)<now);
-  let body = `BVGlazing Systems — Back Order Report\n${new Date().toDateString()}\n\nOpen Orders: ${open}\nOverdue: ${overdue.length}\n\n`;
-  if (overdue.length) { body += `OVERDUE ORDERS:\n`; overdue.forEach(o => { body += `- ${o.id} | ${o.projectName} | ${o.assignee} | Due: ${formatDate(o.dueDate)}\n`; }); }
-  window.location.href = `mailto:?subject=BVGlazing Back Order Report — ${new Date().toDateString()}&body=${encodeURIComponent(body)}`;
-}
-
-function emailOrder() {
-  const proj = document.getElementById('f_projectName').value;
-  const reason = document.getElementById('f_reason').value;
-  const id = editingId || 'New Order';
-  const body = `Back Order: ${id}\nProject: ${proj}\nReason: ${reason}\n\nBVGlazing Systems Order Tracker`;
-  window.location.href = `mailto:?subject=Back Order — ${proj}&body=${encodeURIComponent(body)}`;
-}
-
-// ═══════════════════════════════════════════
-// CLOUD SYNC (JSONbin.io)
-// ═══════════════════════════════════════════
-function openSyncModal() {
-  const d = getData();
-  const lastSync = d.lastSync ? `Last synced: ${fmtRelative(d.lastSync)}` : 'Never synced';
-  document.getElementById('syncBody').innerHTML = `
-    <div class="sync-status-bar">
-      <div class="sync-dot" id="modalSyncDot"></div>
-      <span id="modalSyncStatus">Connected to BVGlazing Google Sheets · ${lastSync}</span>
-    </div>
-    <div class="sync-instructions">
-      <strong>☁️ Google Sheets Cloud Sync is active</strong>
-      <p style="margin-top:8px">All back orders and service orders sync automatically to your shared Google Sheet every 30 seconds. All team members on the same network share the same data.</p>
-      <p style="margin-top:8px;color:var(--gray-500);font-size:11px">📷 Note: Photos are stored locally on each device to save bandwidth. Order text data (status, comments, notes) syncs to the cloud.</p>
-    </div>
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-blue btn-sm" onclick="syncNow()">🔄 Sync Now</button>
-      <button class="btn btn-secondary btn-sm" onclick="pullFromCloud()">⬇ Pull Latest from Cloud</button>
-    </div>`;
-  openModal('syncModal');
-  // Run a quick sync check
-  syncFromCloud(true);
-}
-
-async function saveSyncSettings() {
-  await syncNow();
-  closeModal('syncModal');
-}
-
-async function syncNow() {
-  await syncToCloud();
-  await syncFromCloud(false);
-}
-
-async function syncToCloud() {
-  const d = getData();
-  setSyncStatus('syncing');
-  try {
-    // Flatten orders to rows for Google Sheets compatibility
-    const payload = {
-      action: 'save',
-      backOrders: d.backOrders.map(o => flattenForCloud(o)),
-      serviceOrders: d.serviceOrders.map(o => flattenForCloud(o)),
-      savedAt: new Date().toISOString(),
-      savedBy: currentUser
-    };
-    const res = await fetch(CLOUD_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
-    });
-    d.lastSync = new Date().toISOString();
-    save();
-    setSyncStatus('online');
-    document.getElementById('syncLabel').textContent = `Synced ${fmtRelative(d.lastSync)}`;
-    toast('☁️ Saved to cloud');
-  } catch(e) { setSyncStatus('offline'); }
-}
-
-async function syncFromCloud(quiet) {
-  const d = getData();
-  try {
-    const res = await fetch(CLOUD_URL + '?action=load&t=' + Date.now());
-    if (!res.ok) throw new Error();
-    const remote = await res.json();
-    if (remote && remote.savedAt && (!d.lastSync || remote.savedAt > d.lastSync)) {
-      // Merge: keep local photos, take cloud text data
-      if (remote.backOrders && remote.backOrders.length) {
-        remote.backOrders.forEach(ro => {
-          const local = d.backOrders.find(lo => lo.id === ro.id);
-          if (local) { Object.assign(local, ro); if (!local.photos) local.photos = []; }
-          else d.backOrders.push({ ...ro, photos: [] });
-        });
-      }
-      if (remote.serviceOrders && remote.serviceOrders.length) {
-        remote.serviceOrders.forEach(ro => {
-          const local = d.serviceOrders.find(lo => lo.id === ro.id);
-          if (local) { Object.assign(local, ro); if (!local.photos) local.photos = []; }
-          else d.serviceOrders.push({ ...ro, photos: [] });
-        });
-      }
-      d.lastSync = remote.savedAt;
-      save();
-      renderTable(); renderServiceTable(); renderStats(); checkOverdue();
-      setSyncStatus('online');
-      if (!quiet) toast('☁️ Pulled latest from cloud');
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; currentPhotos = []; currentComments = []; currentActivity = []; }
+function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+function logActivity(text) { currentActivity.push({ at: new Date().toISOString(), user: currentUser, text }); }
+function saveOrder() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const list = activeTab === 'backorders' ? backOrders : serviceOrders;
+  const oldOrder = editingId ? list.find(o => o.id === editingId) : null;
+  const wasCompleted = oldOrder?.status === 'Completed';
+  if (activeTab === 'backorders') {
+    const obj = { id:g('f-id'), jobCode:g('f-jobCode'), workOrder:g('f-workOrder'), projectName:g('f-projectName'), floor:g('f-floor'), windowDoorNum:g('f-windowDoorNum'), product:g('f-product'), dueDate:g('f-dueDate'), priority:g('f-priority'), status:g('f-status'), assignee:g('f-assignee'), reason:g('f-reason'), photos: currentPhotos, comments: currentComments, activity: currentActivity };
+    if (!obj.projectName || !obj.dueDate) { alert('Please fill Project Name and Due Date.'); return; }
+    if (obj.status === 'Completed' && !wasCompleted) { obj.completedAt = new Date().toISOString(); obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'marked as completed ✓' }); }
+    if (oldOrder) {
+      // Diff & log changes
+      ['priority','status','assignee','dueDate'].forEach(k => { if (oldOrder[k] !== obj[k]) obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: `changed ${k} from "${oldOrder[k]||'—'}" to "${obj[k]||'—'}"` }); });
+      obj.createdAt = oldOrder.createdAt;
+      if (wasCompleted) obj.completedAt = oldOrder.completedAt;
+      const i = backOrders.findIndex(o => o.id === editingId); if (i>=0) backOrders[i] = obj;
     } else {
-      setSyncStatus('online');
+      obj.createdAt = new Date().toISOString().slice(0,10);
+      obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'created this order' });
+      backOrders.unshift(obj);
     }
-    // Update modal status if open
-    const ms = document.getElementById('modalSyncStatus');
-    if (ms && d.lastSync) ms.textContent = `Connected to BVGlazing Google Sheets · Last synced: ${fmtRelative(d.lastSync)}`;
-  } catch(e) {
-    // CORS no-cors mode: Google Apps Script may not return parseable JSON on cross-origin
-    setSyncStatus('online');
+    // Notify assignee on new assignment
+    if (obj.assignee && obj.assignee !== currentUser && (!oldOrder || oldOrder.assignee !== obj.assignee)) {
+      notifications.unshift({ id: Date.now()+Math.random(), title: `📌 New assignment from ${currentUser}`, msg: `${obj.id} — ${obj.projectName}`, type: 'success', at: new Date().toISOString(), read: false, user: obj.assignee });
+    }
+  } else {
+    const obj = { id:g('f-id'), jobCode:g('f-jobCode'), client:g('f-client'), issueType:g('f-issueType'), technician:g('f-technician'), dueDate:g('f-dueDate'), priority:g('f-priority'), status:g('f-status'), assignee:g('f-assignee'), notes:g('f-notes'), photos: currentPhotos, comments: currentComments, activity: currentActivity };
+    if (!obj.client || !obj.dueDate) { alert('Please fill Client Name and Due Date.'); return; }
+    if (obj.status === 'Completed' && !wasCompleted) { obj.completedAt = new Date().toISOString(); obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'marked as completed ✓' }); }
+    if (oldOrder) {
+      ['priority','status','assignee','dueDate'].forEach(k => { if (oldOrder[k] !== obj[k]) obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: `changed ${k} from "${oldOrder[k]||'—'}" to "${obj[k]||'—'}"` }); });
+      obj.createdAt = oldOrder.createdAt;
+      if (wasCompleted) obj.completedAt = oldOrder.completedAt;
+      const i = serviceOrders.findIndex(o => o.id === editingId); if (i>=0) serviceOrders[i] = obj;
+    } else {
+      obj.createdAt = new Date().toISOString().slice(0,10);
+      obj.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'created this order' });
+      serviceOrders.unshift(obj);
+    }
+    if (obj.assignee && obj.assignee !== currentUser && (!oldOrder || oldOrder.assignee !== obj.assignee)) {
+      notifications.unshift({ id: Date.now()+Math.random(), title: `📌 New assignment from ${currentUser}`, msg: `${obj.id} — ${obj.client}`, type: 'success', at: new Date().toISOString(), read: false, user: obj.assignee });
+    }
+  }
+  closeModal(); saveData(); renderAll();
+  pushNotification('✓ Saved', 'Order saved successfully.', 'success');
+}
+function editOrder(id) {
+  const o = activeTab==='backorders' ? backOrders.find(x=>x.id===id) : serviceOrders.find(x=>x.id===id);
+  if (o) openModal(o);
+}
+function markComplete(id) {
+  const list = activeTab==='backorders' ? backOrders : serviceOrders;
+  const o = list.find(x=>x.id===id);
+  if (o) {
+    o.status = 'Completed';
+    o.completedAt = new Date().toISOString();
+    if (!o.activity) o.activity = [];
+    o.activity.push({ at: new Date().toISOString(), user: currentUser, text: 'marked as completed ✓' });
+    saveData(); renderAll();
+    pushNotification('✓ Done', `${id} completed!`, 'success');
   }
 }
-
-async function pullFromCloud() {
-  await syncFromCloud(false);
+function deleteOrder(id) {
+  if (!confirm(`Delete ${id}?`)) return;
+  if (activeTab==='backorders') backOrders = backOrders.filter(o=>o.id!==id);
+  else serviceOrders = serviceOrders.filter(o=>o.id!==id);
+  saveData(); renderAll();
 }
-
-function flattenForCloud(o) {
-  // Strip photo base64 data (too large for Sheets), keep metadata
-  return {
-    ...o,
-    photos: (o.photos || []).map(p => ({ name: p.name, type: p.type, size: p.size })),
-  };
+// ─── EMAIL ORDER ────────────────────────────────────────
+function emailOrder() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const id = g('f-id');
+  const isBack = activeTab === 'backorders';
+  const subject = isBack
+    ? `Back Order Update: ${id} - ${g('f-projectName')}`
+    : `Service Order Update: ${id} - ${g('f-client')}`;
+  let body = `Hi,\n\nUpdate on ${isBack?'back':'service'} order ${id}:\n\n`;
+  if (isBack) {
+    body += `Job Code: ${g('f-jobCode')}\nWork Order: ${g('f-workOrder')}\nProject: ${g('f-projectName')}\nFloor: ${g('f-floor')}\nWindow/Door: ${g('f-windowDoorNum')}\nProduct: ${g('f-product')}\nDue Date: ${g('f-dueDate')}\nPriority: ${g('f-priority')}\nStatus: ${g('f-status')}\nAssigned To: ${g('f-assignee')}\nReason: ${g('f-reason')}`;
+  } else {
+    body += `Job Code: ${g('f-jobCode')}\nClient: ${g('f-client')}\nIssue: ${g('f-issueType')}\nTechnician: ${g('f-technician')}\nDue Date: ${g('f-dueDate')}\nPriority: ${g('f-priority')}\nStatus: ${g('f-status')}\nAssigned To: ${g('f-assignee')}\nNotes: ${g('f-notes')}`;
+  }
+  if (currentComments.length) {
+    body += `\n\nRecent comments:\n` + currentComments.slice(-3).map(c => `- ${c.author}: ${c.text}`).join('\n');
+  }
+  body += `\n\nSent from BVGlazing Order Tracker by ${currentUser}.`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
-
-function setSyncStatus(state) {
-  const dot = document.getElementById('syncDot');
-  const label = document.getElementById('syncLabel');
-  dot.className = `sync-dot ${state === 'online' ? '' : state === 'syncing' ? 'syncing' : 'offline'}`;
-  if (state === 'syncing') label.textContent = 'Syncing…';
-  else if (state === 'online') label.textContent = 'Cloud synced';
-  else label.textContent = 'Local only';
+// ─── WEEKLY REPORT ──────────────────────────────────────
+function openWeeklyReport() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const all = [...backOrders, ...serviceOrders];
+  const completedThisWeek = all.filter(o => o.completedAt && new Date(o.completedAt) >= weekAgo);
+  const stillOverdue = all.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today);
+  const newThisWeek = all.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
+  const stillUrgent = all.filter(o => o.status !== 'Completed' && o.priority === 'Urgent');
+  // Recurring problems this week
+  const counts = {};
+  all.forEach(o => { const k = o.projectName || o.client; if(!k)return; counts[k] = (counts[k]||0) + 1; });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  // Per-person stats
+  const byPerson = {};
+  TEAM.forEach(t => byPerson[t] = { done:0, open:0 });
+  all.forEach(o => {
+    if (!o.assignee) return;
+    if (!byPerson[o.assignee]) byPerson[o.assignee] = { done:0, open:0 };
+    if (o.completedAt && new Date(o.completedAt) >= weekAgo) byPerson[o.assignee].done++;
+    if (o.status !== 'Completed') byPerson[o.assignee].open++;
+  });
+  const reportHtml = `
+    <div class="report-section">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace">${weekAgo.toLocaleDateString('en-CA')} → ${today.toLocaleDateString('en-CA')}</div>
+      <div style="font-size:0.95rem;color:var(--ink);line-height:1.6">
+        This week: <strong>${completedThisWeek.length} orders closed</strong>, ${newThisWeek.length} new orders created. ${stillOverdue.length} still overdue, ${stillUrgent.length} urgent open.
+      </div>
+    </div>
+    <div class="report-section">
+      <h3>✅ Completed (${completedThisWeek.length})</h3>
+      <ul>${completedThisWeek.length ? completedThisWeek.map(o => `<li>• ${o.id} — ${o.projectName||o.client} (${o.assignee||'Unassigned'})</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None this week</li>'}</ul>
+    </div>
+    <div class="report-section">
+      <h3>⚠️ Still Overdue (${stillOverdue.length})</h3>
+      <ul>${stillOverdue.length ? stillOverdue.map(o => `<li>• ${o.id} — ${o.projectName||o.client} (${o.assignee||'Unassigned'}) — due ${fmt(o.dueDate)}</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None — great work!</li>'}</ul>
+    </div>
+    <div class="report-section">
+      <h3>🔥 Top Recurring Issues</h3>
+      <ul>${top.length ? top.map(([n,c]) => `<li>• ${n} — ${c} order${c>1?'s':''}</li>`).join('') : '<li style="color:var(--muted);font-style:italic">None</li>'}</ul>
+    </div>
+    <div class="report-section">
+      <h3>👥 Team Performance</h3>
+      <ul>${TEAM.filter(t => byPerson[t].done > 0 || byPerson[t].open > 0).map(t => `<li>• ${t}: ${byPerson[t].done} done · ${byPerson[t].open} open</li>`).join('')}</ul>
+    </div>
+  `;
+  document.getElementById('report-body').innerHTML = reportHtml;
+  document.getElementById('report-modal').classList.add('open');
 }
-
-// ═══════════════════════════════════════════
-// BACKUP EXPORT / IMPORT
-// ═══════════════════════════════════════════
+function closeReportModal() { document.getElementById('report-modal').classList.remove('open'); }
+function emailWeeklyReport() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const all = [...backOrders, ...serviceOrders];
+  const completed = all.filter(o => o.completedAt && new Date(o.completedAt) >= weekAgo);
+  const overdue = all.filter(o => o.status !== 'Completed' && new Date(o.dueDate) < today);
+  const newOrders = all.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
+  const subject = `Weekly Order Report — ${today.toLocaleDateString('en-CA')}`;
+  let body = `Hi Firas,\n\nWeekly summary from the Order Tracker (${weekAgo.toLocaleDateString('en-CA')} → ${today.toLocaleDateString('en-CA')}):\n\n`;
+  body += `- Orders completed: ${completed.length}\n- New orders: ${newOrders.length}\n- Still overdue: ${overdue.length}\n\n`;
+  if (completed.length) body += `Completed:\n${completed.map(o => `  • ${o.id} - ${o.projectName||o.client}`).join('\n')}\n\n`;
+  if (overdue.length) body += `Still Overdue:\n${overdue.map(o => `  • ${o.id} - ${o.projectName||o.client} (due ${fmt(o.dueDate)})`).join('\n')}\n\n`;
+  body += `Regards,\n${currentUser}\nBVGlazing Systems — 131 Caldari Road, Concord, ON`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+// ─── SYNC (Export/Import) ───────────────────────────────
+function openSyncModal() { document.getElementById('sync-modal').classList.add('open'); }
+function closeSyncModal() { document.getElementById('sync-modal').classList.remove('open'); }
 function exportBackup() {
-  const d = getData();
-  const blob = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
+  const data = { backOrders, serviceOrders, notifications, exportedAt: new Date().toISOString(), exportedBy: currentUser };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href = url; a.download = `bvglazing-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
-  URL.revokeObjectURL(url);
-  toast('Backup exported ✓');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bvg-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  pushNotification('⬇ Backup Saved', 'Save to a shared cloud folder so the team can sync.', 'success');
 }
-
-function importBackup(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  if (!confirm('This will replace all current data. Continue?')) return;
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = (evt) => {
     try {
-      const data = JSON.parse(ev.target.result);
-      if (!data.backOrders) throw new Error('Invalid backup file');
-      saveDataObj(data);
-      window._appData = data;
-      renderTable(); renderServiceTable(); renderStats(); checkOverdue();
-      closeModal('syncModal');
-      toast('Backup imported ✓');
-    } catch(err) { toast('Import failed: ' + err.message); }
+      const data = JSON.parse(evt.target.result);
+      if (data.backOrders) backOrders = data.backOrders;
+      if (data.serviceOrders) serviceOrders = data.serviceOrders;
+      if (data.notifications) notifications = data.notifications;
+      saveData(); renderAll(); closeSyncModal();
+      pushNotification('⬆ Imported', `Data imported (exported by ${data.exportedBy || 'unknown'})`, 'success');
+    } catch (err) { alert('Invalid backup file: ' + err.message); }
   };
   reader.readAsText(file);
 }
-
-// ═══════════════════════════════════════════
-// CSV EXPORT
-// ═══════════════════════════════════════════
+// ─── EXPORT CSV ─────────────────────────────────────────
 function exportCSV() {
-  const d = getData();
-  const arr = currentTab === 'service' ? d.serviceOrders : d.backOrders;
-  const headers = ['ID','Job Code','Work Order','Project','Floor','W/D #','Product','Due Date','Priority','Status','Assigned','Reason','Notes'];
-  const rows = arr.map(o => [o.id,o.jobCode,o.workOrder,o.projectName,o.floor,o.windowDoorNum,o.product,o.dueDate||o.serviceDate,o.priority,o.status,o.assignee,`"${(o.reason||'').replace(/"/g,'""')}"`,`"${(o.notes||'').replace(/"/g,'""')}"`]);
-  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
+  const orders = activeTab==='backorders' ? backOrders : serviceOrders;
+  if (!orders.length) return;
+  const exportable = orders.map(({photos, comments, activity, ...rest}) => ({...rest, photoCount:(photos||[]).length, commentCount:(comments||[]).length}));
+  const keys = Object.keys(exportable[0]);
+  const csv = [keys.join(','), ...exportable.map(o => keys.map(k=>`"${(o[k]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
   const a = document.createElement('a');
-  a.href = url; a.download = `bvglazing-${currentTab}-orders-${new Date().toISOString().slice(0,10)}.csv`; a.click();
-  URL.revokeObjectURL(url);
-  toast('CSV exported ✓');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `${activeTab}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
-
-// ═══════════════════════════════════════════
-// USER
-// ═══════════════════════════════════════════
-function changeUser(user) {
-  currentUser = user;
-  renderStats(); renderTable();
-}
-
-// ═══════════════════════════════════════════
-// MODAL HELPERS
-// ═══════════════════════════════════════════
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// Close modals on overlay click
-document.querySelectorAll('.overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el && el.id !== 'photoViewer') closeModal(el.id); });
-});
-
-// ═══════════════════════════════════════════
-// MOBILE MENU
-// ═══════════════════════════════════════════
-function openMobileMenu() {
-  document.getElementById('sidebar').classList.add('mobile-open');
-  document.getElementById('mobileOverlay').classList.add('open');
-}
-function closeMobileMenu() {
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.getElementById('mobileOverlay').classList.remove('open');
-}
-
-// ═══════════════════════════════════════════
-// DATE HELPERS
-// ═══════════════════════════════════════════
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-CA', {month:'short', day:'numeric', year:'numeric'});
-}
-
-function fmtRelative(iso) {
-  if (!iso) return '';
-  const diff = (Date.now() - new Date(iso)) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.round(diff/60)}m ago`;
-  if (diff < 86400) return `${Math.round(diff/3600)}h ago`;
-  return `${Math.round(diff/86400)}d ago`;
-}
-
-// ═══════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════
-function toast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-// ═══════════════════════════════════════════
-// DRAG & DROP UPLOAD
-// ═══════════════════════════════════════════
-function setupDragDrop() {
-  const area = document.getElementById('uploadArea');
-  if (!area) return;
-  area.addEventListener('dragover', e => { e.preventDefault(); area.style.borderColor='var(--blue)'; });
-  area.addEventListener('dragleave', () => { area.style.borderColor=''; });
-  area.addEventListener('drop', e => {
-    e.preventDefault(); area.style.borderColor='';
-    const files = Array.from(e.dataTransfer.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = ev => { pendingPhotos.push({id:Date.now()+Math.random(),name:file.name,type:file.type,data:ev.target.result}); renderFormPhotos(); };
-      reader.readAsDataURL(file);
-    });
-  });
-}
-
-// Observe modal open to set up drag-drop
-const observer = new MutationObserver(() => setupDragDrop());
-observer.observe(document.getElementById('orderModal'), {attributes:true, attributeFilter:['class']});
-
-// ═══════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ═══════════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.overlay.open').forEach(el => closeModal(el.id));
-    document.getElementById('notifPanel').classList.remove('open');
-  }
-  if (e.key === 'n' && !e.ctrlKey && !e.metaKey && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
-    openNewOrder();
-  }
-});
-
-// Click outside notif panel
-document.addEventListener('click', e => {
-  const panel = document.getElementById('notifPanel');
-  const btn = document.getElementById('notifBtn');
-  if (panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)) {
-    panel.classList.remove('open');
-  }
-});
-
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-function init() {
-  getData(); // load
-  updateClock(); setInterval(updateClock, 60000);
-  renderStats();
+function fmt(d) { if (!d) return '—'; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
+function emptyRow(cols) { return `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:32px;font-style:italic">No orders match.</td></tr>`; }
+function genId(prefix) { const list = prefix==='BO' ? backOrders : serviceOrders; const nums = list.map(o => parseInt(o.id.split('-')[1])).filter(n => !isNaN(n)); return prefix + '-' + (Math.max(...nums, 1000) + 1); }
+function datesEqual(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function renderAll() {
+  renderDailySummary();
+  renderQuickFilters();
+  renderKPIs();
   renderTable();
-  checkOverdue();
-  // Auto-sync from cloud every 90s (pull latest from teammates)
-  setInterval(() => syncFromCloud(true), 90000);
-  // Initial sync on load
-  setSyncStatus('syncing');
-  document.getElementById('syncLabel').textContent = 'Connecting…';
-  syncFromCloud(true);
+  renderWeeklyChart();
+  renderRecurringProblems();
+  renderNotifBadge();
 }
-
-init();
+// ─── INIT ────────────────────────────────────────────────
+loadUser();
+if (!loadData()) {
+  backOrders = [];
+  serviceOrders = [];
+}
+setInterval(updateClock, 1000); updateClock();
+setInterval(checkOverdueAndReminders, 60000);
+// Auto-refresh from cloud every 30 seconds
+setInterval(async () => { if(document.visibilityState==='visible') { await cloudLoad(); renderAll(); } }, 30000);
+renderAll();
+// Initial cloud load
+(async () => {
+  const ok = await cloudLoad();
+  if (!ok && backOrders.length === 0 && serviceOrders.length === 0) {
+    backOrders = JSON.parse(JSON.stringify(DEFAULT_BO));
+    serviceOrders = JSON.parse(JSON.stringify(DEFAULT_SO));
+    saveData();
+  }
+  renderAll();
+  setTimeout(() => { checkOverdueAndReminders(); }, 1000);
+})();
+// Close notif dropdown on outside click
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('notif-dropdown');
+  const bell = document.querySelector('.notif-bell');
+  if (dd.classList.contains('open') && !dd.contains(e.target) && !bell.contains(e.target)) dd.classList.remove('open');
+});
 </script>
 </body>
 </html>
